@@ -8,6 +8,9 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
     private Scene scene;
+    private LogicConsole logicConsole;
+    private OsmBrowser browser;
+    
     @Override public void start(Stage stage) {
         // create the scene
         stage.setTitle("MapQuery");
@@ -15,8 +18,8 @@ public class Main extends Application {
         //VBox vbox = new VBox();
         //vbox.setPadding(new Insets(10));
         //vbox.setSpacing(8);
-        OsmBrowser browser = new OsmBrowser();
-        LogicConsole logicConsole = new LogicConsole(browser.getEngine());
+        browser = new OsmBrowser();
+        logicConsole = new LogicConsole(browser.getEngine());
         borderPane.setTop(logicConsole);
         borderPane.setBottom(browser);
         scene = new Scene(borderPane,Color.web("#CAE1FF"));
@@ -27,6 +30,12 @@ public class Main extends Application {
         stage.show();
     }
  
+    @Override public void stop() {
+    	//a call to super is not needed since according to the documentation: "The implementation of this method provided by the Application class does nothing."
+    	if(logicConsole.getJpcExecutor() != null)
+    		logicConsole.getJpcExecutor().shutdownNow();
+    }
+    
     public static void main(String[] args){
         launch(args);
     }
