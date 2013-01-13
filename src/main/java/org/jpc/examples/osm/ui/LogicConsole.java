@@ -1,7 +1,5 @@
 package org.jpc.examples.osm.ui;
 
-import static org.jpc.util.ThreadLocalLogicEngine.getLogicEngine;
-
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,31 +29,35 @@ import org.jpc.engine.prolog.PrologEngineConfiguration;
 import org.jpc.examples.osm.imp.MapQuery;
 import org.jpc.examples.osm.imp.OsmDataLoader;
 import org.jpc.term.Term;
-import org.jpc.util.LogicEngineManager;
+import org.jpc.util.PrologEngineManager;
 import org.jpc.util.LogicResourceLoader;
-import org.jpc.util.ThreadLocalLogicEngine;
+import org.jpc.util.concurrent.ThreadLocalPrologEngine;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
 
 public class LogicConsole extends GridPane {
 
-	public static final Font TITLE_FONT = Font.font("Helvetica", FontWeight.NORMAL, 20);
+	public static final Font TITLE_FONT = Font.font("Helvetica", FontWeight.NORMAL, 20); //TODO move this to a style file
+	
+	public static final String NODE_VARIABLE_NAME = "Node";
+	public static final String WAY_VARIABLE_NAME = "Way";
+	
 	
 	final Multimap<String, PrologEngineConfiguration> groupedEngineConfigurations;
-	final ComboBox logicEnginesComboBox;
+	final ComboBox prologEnginesComboBox;
 	final ComboBox bridgeLibraryComboBox;
 	private OsmBrowser osmBrowser;
 	private WebEngine webEngine;
-	private PrologEngine logicEngine;
+	private PrologEngine prologEngine;
 	
 	public LogicConsole(WebEngine webEngine) {
 		this.webEngine = webEngine;
-		LogicEngineManager manager = LogicEngineManager.getDefault();
-		manager.register(LogicEngineManager.findConfigurations());
-		groupedEngineConfigurations = manager.groupByLogicEngine();
-		final Multiset<String> logicEnginesMultiset = groupedEngineConfigurations.keys();
-		Set<String> logicEngines = new HashSet(Arrays.asList(logicEnginesMultiset.toArray()));
+		PrologEngineManager manager = PrologEngineManager.getDefault();
+		manager.register(PrologEngineManager.findConfigurations());
+		groupedEngineConfigurations = manager.groupByPrologEngine();
+		final Multiset<String> prologEnginesMultiset = groupedEngineConfigurations.keys();
+		Set<String> prologEngines = new HashSet(Arrays.asList(prologEnginesMultiset.toArray()));
 		
 		//setAlignment(Pos.CENTER);
 		setHgap(10);
@@ -67,19 +69,19 @@ public class LogicConsole extends GridPane {
 		add(logicConsoleTitle, 0, 0, 2, 1);
 		
 		
-		logicEnginesComboBox = new ComboBox();
+		prologEnginesComboBox = new ComboBox();
 		bridgeLibraryComboBox = new ComboBox();
 		
-		logicEnginesComboBox.valueProperty().addListener(new ChangeListener<String>() {
+		prologEnginesComboBox.valueProperty().addListener(new ChangeListener<String>() {
 
 			@Override
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
 				if(!newValue.equals(oldValue)) {
 					Set<String> bridgeLibraries = new HashSet<>();
-					String selectedLogicEngine = (String) logicEnginesComboBox.getValue();
-					Collection<PrologEngineConfiguration> logicEngineConfigurations = groupedEngineConfigurations.get(selectedLogicEngine);
-					for(PrologEngineConfiguration logicEngineConfiguration : logicEngineConfigurations) {
-						bridgeLibraries.add(logicEngineConfiguration.getLibraryName());
+					String selectedPrologEngine = (String) prologEnginesComboBox.getValue();
+					Collection<PrologEngineConfiguration> prologEngineConfigurations = groupedEngineConfigurations.get(selectedPrologEngine);
+					for(PrologEngineConfiguration prologEngineConfiguration : prologEngineConfigurations) {
+						bridgeLibraries.add(prologEngineConfiguration.getLibraryName());
 					}
 					bridgeLibraryComboBox.getItems().clear();
 					bridgeLibraryComboBox.getItems().addAll(bridgeLibraries);
@@ -90,10 +92,10 @@ public class LogicConsole extends GridPane {
 			}
 		});
 		
-		logicEnginesComboBox.getItems().addAll(logicEngines);
+		//prologEnginesComboBox.getItems().addAll(lprologEngines
 
 		add(new Label("Prolog engine:"), 0,1);
-		add(logicEnginesComboBox, 1,1);
+		add(prologEnginesComboBox, 1,1);
 		add(new Label("Bridge library:"), 0,2);
 		add(bridgeLibraryComboBox, 1,2);
 		
@@ -148,11 +150,11 @@ public class LogicConsole extends GridPane {
 				if(osmFile.isEmpty())
 					SimpleDialog.error("Please select a file with OSM data to load").showDialog();
 				else {
-					if(logicEngine != null || initializeLogicEngine()) {
+					if(prologEngine != null || initializePrologEngine()) {
 						progress.setVisible(true); //this is affecting the progress bar only after the handle method has returned
 						//progress.setProgress(0);
 						try {
-							new OsmDataLoader(logicEngine).load(osmFile);
+							new OsmDataLoader(prologEngine).load(osmFile);
 							progress.setProgress(1);
 						} catch(RuntimeException e) {
 							progress.setVisible(false);
@@ -171,27 +173,48 @@ public class LogicConsole extends GridPane {
 		add(progress, 4,3);
 		progress.setVisible(false);
 		//progress.setDisable(true);
-		if(!logicEngines.isEmpty()) {
-			logicEnginesComboBox.setValue(logicEngines.iterator().next());
+		if(!prologEngines.isEmpty()) {
+			prologEnginesComboBox.setValue(prologEngines.iterator().next());
 		} else {
 			SimpleDialog.warning("Impossible to find available logic engines. The application will not work correctly.").showDialog();
 		}
 	}
 	
-	private boolean initializeLogicEngine() {
-		if(verifyLogicEngineSelection()) {
-			logicEngine = getSelectedLogicEngine();
-			ThreadLocalLogicEngine.setLogicEngine(logicEngine);
-			new LogicResourceLoader(getLogicEngine()).logtalkLoad(MapQuery.LOADER_FILE);
+	private boolean initializePrologEngine() {
+		if(verifyPrologEngineSelection()) {
+			prologEngine = getSelectedPrologEngine();
+			ThreadLocalPrologEngine.setPrologEngine(prologEngine);
+			Thread t = new Thread() {
+				@Override public void run() {
+					System.out.println(ThreadLocalPrologEngine.getPrologEngine() != null);
+					ThreadLocalPrologEngine.setPrologEngine(prologEngine);
+					System.out.println(ThreadLocalPrologEngine.getPrologEngine() != null);
+				}
+			};
+			t.start();
+			try {
+				t.join();
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+			
+			try {
+				t.join();
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+			
+			
+			new LogicResourceLoader(prologEngine).logtalkLoad(MapQuery.LOADER_FILE);
 			disableEngineConfigurationOptions();
 			return true;
 		} else
 			return false;
 	}
 	
-	private PrologEngine getSelectedLogicEngine() {
-		String logicEngineName = (String)logicEnginesComboBox.getValue();
-		Collection<PrologEngineConfiguration> configurations = groupedEngineConfigurations.get(logicEngineName);
+	private PrologEngine getSelectedPrologEngine() {
+		String prologEngineName = (String)prologEnginesComboBox.getValue();
+		Collection<PrologEngineConfiguration> configurations = groupedEngineConfigurations.get(prologEngineName);
 		String libraryName = (String) bridgeLibraryComboBox.getValue();
 		for(PrologEngineConfiguration config : configurations) {
 			if(config.getLibraryName().equals(libraryName))
@@ -204,8 +227,8 @@ public class LogicConsole extends GridPane {
 	 * Verify that a logic engine can be instantiated, otherwise shows an error message
 	 * @return true if a logic engine can be instantiated, false otherwise
 	 */
-	private boolean verifyLogicEngineSelection() {
-		if(((String)logicEnginesComboBox.getValue()).trim().isEmpty() || ((String)bridgeLibraryComboBox.getValue()).trim().isEmpty()) {
+	private boolean verifyPrologEngineSelection() {
+		if(((String)prologEnginesComboBox.getValue()).trim().isEmpty() || ((String)bridgeLibraryComboBox.getValue()).trim().isEmpty()) {
 			SimpleDialog.error("Please select a logic engine and a bridge library.").showDialog();
 			return false;
 		} else
@@ -213,7 +236,7 @@ public class LogicConsole extends GridPane {
 	}
 	
 	public void disableEngineConfigurationOptions() {
-		logicEnginesComboBox.setDisable(true);
+		prologEnginesComboBox.setDisable(true);
 		bridgeLibraryComboBox.setDisable(true);
 	}
 	
@@ -226,18 +249,21 @@ public class LogicConsole extends GridPane {
 	}
 	
 	public void query(String queryString) {
-		Multimap<String, Term> mapQueryResult = evaluateQuery();
+		Multimap<String, Term> mapQueryResult = prologEngine.query(queryString).allSolutionsMultimap();
 		drawQuery(mapQueryResult);
 	}
 
 	private void drawQuery(Multimap<String, Term> mapQueryResult) {
-		// TODO Auto-generated method stub
+		Collection<Term> nodeTerms = mapQueryResult.get(NODE_VARIABLE_NAME);
+		Collection<Term> wayTerms = mapQueryResult.get(WAY_VARIABLE_NAME);
 		
+		int numberNodes = nodeTerms!=null?nodeTerms.size():0;
+		int numberWays = nodeTerms!=null?wayTerms.size():0;
+		
+		System.out.println("Number of nodes: " + numberNodes);
+		System.out.println("Number of ways: " + numberWays);
 	}
 
-	private Multimap<String, Term> evaluateQuery() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+
 
 }

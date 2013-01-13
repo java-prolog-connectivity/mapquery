@@ -2,7 +2,7 @@ package org.jpc.examples.osm.imp;
 
 import static java.util.Arrays.asList;
 import static org.jpc.engine.logtalk.LogtalkObject.logtalkMessage;
-import static org.jpc.util.ThreadLocalLogicEngine.getLogicEngine;
+import static org.jpc.util.concurrent.ThreadLocalPrologEngine.getPrologEngine;
 
 import java.util.List;
 import java.util.Map;
@@ -27,7 +27,7 @@ public class OsmImp implements Osm {
 	@Override
 	public List<Node> getNodes() {
 		Term message = new Compound("node",asList(new Variable("Node")));
-		Query query = new LogtalkObject(this, getLogicEngine()).perform(message);
+		Query query = new LogtalkObject(this, getPrologEngine()).perform(message);
 		return query.select("Node").adapt(new TermToNodeConverter()).allSolutions();
 	}
 
@@ -35,7 +35,7 @@ public class OsmImp implements Osm {
 	public List<Node> getNodes(Map<String, String> tags) {
 		String nodeVariableName = "Node";
 		Variable nodeVariable = new Variable(nodeVariableName);
-		Query query = getLogicEngine().query(
+		Query query = getPrologEngine().query(
 				logtalkMessage(this, new Compound("node", asList(nodeVariable))),
 				logtalkMessage(nodeVariable, new Compound("has_tags", asList(new MapToTermConverter().apply(tags)))));
 		return query.select(nodeVariableName).adapt(new TermToNodeConverter()).allSolutions();
@@ -45,7 +45,7 @@ public class OsmImp implements Osm {
 	public List<Node> getNearNodes(Coordinates coordinates, double distanceKm) {
 		String nodeVariableName = "Node";
 		Variable nodeVariable = new Variable(nodeVariableName);
-		Query query = getLogicEngine().query(
+		Query query = getPrologEngine().query(
 				logtalkMessage(this, new Compound("node", asList(nodeVariable))),
 				logtalkMessage(nodeVariable, new Compound("near", asList(coordinates, new FloatTerm(distanceKm)))));
 		return query.select(nodeVariableName).adapt(new TermToNodeConverter()).allSolutions();
@@ -55,7 +55,7 @@ public class OsmImp implements Osm {
 	public List<Node> getNearNodes(Coordinates coordinates, double distanceKm, Map<String, String> tags) {
 		String nodeVariableName = "Node";
 		Variable nodeVariable = new Variable(nodeVariableName);
-		Query query = getLogicEngine().query(
+		Query query = getPrologEngine().query(
 				logtalkMessage(this, new Compound("node", asList(nodeVariable))),
 				logtalkMessage(nodeVariable, new Compound("has_tags", asList(new MapToTermConverter().apply(tags)))),
 				logtalkMessage(nodeVariable, new Compound("near", asList(coordinates, new FloatTerm(distanceKm)))));
@@ -65,7 +65,7 @@ public class OsmImp implements Osm {
 	@Override
 	public List<Way> getWays() {
 		Term message = new Compound("way",asList(new Variable("Way")));
-		Query query = new LogtalkObject(this, getLogicEngine()).perform(message);
+		Query query = new LogtalkObject(this, getPrologEngine()).perform(message);
 		return query.select("Way").adapt(new TermToWayConverter()).allSolutions();
 	}
 
@@ -73,7 +73,7 @@ public class OsmImp implements Osm {
 	public List<Way> getWays(Map<String, String> tags) {
 		String wayVariableName = "Way";
 		Variable wayVariable = new Variable(wayVariableName);
-		Query query = getLogicEngine().query(
+		Query query = getPrologEngine().query(
 				logtalkMessage(this, new Compound("way", asList(wayVariable))),
 				logtalkMessage(wayVariable, new Compound("has_tags", asList(new MapToTermConverter().apply(tags)))));
 		return query.select(wayVariableName).adapt(new TermToWayConverter()).allSolutions();
@@ -83,7 +83,7 @@ public class OsmImp implements Osm {
 	public List<Way> getNearWays(Coordinates coordinates, double distanceKm) {
 		String wayVariableName = "Way";
 		Variable wayVariable = new Variable(wayVariableName);
-		Query query = getLogicEngine().query(
+		Query query = getPrologEngine().query(
 				logtalkMessage(this, new Compound("way", asList(wayVariable))),
 				logtalkMessage(wayVariable, new Compound("near", asList(coordinates, new FloatTerm(distanceKm)))));
 		return query.select(wayVariableName).adapt(new TermToWayConverter()).allSolutions();
@@ -93,7 +93,7 @@ public class OsmImp implements Osm {
 	public List<Way> getNearWays(Coordinates coordinates, double distanceKm, Map<String, String> tags) {
 		String wayVariableName = "Way";
 		Variable wayVariable = new Variable(wayVariableName);
-		Query query = getLogicEngine().query(
+		Query query = getPrologEngine().query(
 				logtalkMessage(this, new Compound("way", asList(wayVariable))),
 				logtalkMessage(wayVariable, new Compound("has_tags", asList(new MapToTermConverter().apply(tags)))),
 				logtalkMessage(wayVariable, new Compound("near", asList(coordinates, new FloatTerm(distanceKm)))));

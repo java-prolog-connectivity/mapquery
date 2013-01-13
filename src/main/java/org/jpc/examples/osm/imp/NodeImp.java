@@ -1,7 +1,7 @@
 package org.jpc.examples.osm.imp;
 
 import static java.util.Arrays.asList;
-import static org.jpc.util.ThreadLocalLogicEngine.getLogicEngine;
+import static org.jpc.util.concurrent.ThreadLocalPrologEngine.getPrologEngine;
 
 import java.util.Map;
 
@@ -56,14 +56,14 @@ public class NodeImp implements Node {
 	public long distanceKm(Coordinates other) {
 		String distanceVarName = "Distance";
 		Term message = new Compound("distancekm", asList(other, new Variable(distanceVarName)));
-		Query query = new LogtalkObject(this, getLogicEngine()).perform(message);
+		Query query = new LogtalkObject(this, getPrologEngine()).perform(message);
 		return ((IntegerTerm)query.oneSolution().get(distanceVarName)).longValue();
 	}
 
 	@Override
 	public boolean near(Coordinates other, long deltaKm) {
 		Term message = new Compound("near", asList(other, new IntegerTerm(deltaKm)));
-		Query query = new LogtalkObject(this, getLogicEngine()).perform(message);
+		Query query = new LogtalkObject(this, getPrologEngine()).perform(message);
 		return query.hasSolution();
 	}
 	

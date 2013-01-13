@@ -15,7 +15,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.jpc.engine.prolog.PrologEngine;
-import org.jpc.salt.LogicEngineWriter;
+import org.jpc.salt.PrologEngineWriter;
 import org.jpc.salt.PrologStreamWriter;
 import org.jpc.salt.PrologWriter;
 import org.xml.sax.Attributes;
@@ -37,11 +37,11 @@ public class OsmDataLoader {
 	public static final String KEY_TAG_ATTRIBUTE = "k"; //key xml attribute
 	public static final String VALUE_TAG_ATTRIBUTE = "v"; //key xml attribute
 	
-	private PrologEngine logicEngine;
+	private PrologEngine prologEngine;
 	private PrologWriter writer;
 	
-	public OsmDataLoader(PrologEngine logicEngine) {
-		this.logicEngine = logicEngine;
+	public OsmDataLoader(PrologEngine prologEngine) {
+		this.prologEngine = prologEngine;
 	}
 
 	public void load(String fileName) {
@@ -60,9 +60,9 @@ public class OsmDataLoader {
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 		
 //		try(PrintStream ps = new PrintStream("brussels_center_filtered.lgt")) {
-//			writer = new PrologStreamWriter(logicEngine, ps);
+//			writer = new PrologStreamWriter(prologEngine, ps);
 		try {
-			writer = new LogicEngineWriter(logicEngine);
+			writer = new PrologEngineWriter(prologEngine);
 			
 			writer.followingDynamicClauses();
 			writer.startLogtalkObjectContext().startAtom("osm");
