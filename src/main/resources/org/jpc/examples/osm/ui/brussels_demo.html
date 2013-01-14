@@ -73,14 +73,11 @@
 		var map;
 		var vectorLayer;
 		var features;
+		var defaultZoom = 11; //Starting zoom level
 		
 		function initMap() {
-			//Brussels coordinates
-			var lat=50.8467493;
-			var lon=4.3524950;
-			
-			//Starting zoom level
-			var zoom=11;
+
+
 
 			var osm_format;
 			
@@ -149,8 +146,13 @@
 			map.addControls([selectFeatureControl, new OpenLayers.Control.LayerSwitcher({})]);
 			selectFeatureControl.activate();
 			
-			var lonLat = new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
-			map.setCenter (lonLat, zoom);
+			//Brussels coordinates
+			var lon=4.3524950;
+			var lat=50.8467493;
+			
+			$('#longitude').val(lon);
+			$('#latitude').val(lat);
+			goToCoordinates(lon, lat, defaultZoom);
 			
 			/*
 			if(!map.getCenter()){
@@ -159,21 +161,27 @@
 			*/
 		}
 	
-		function goToCoordinates() {
-			var latitude = $('#latitude').val();
-			var longitude = $('#longitude').val();
-			alert('go to ' + latitude + ' : ' + longitude);
+		function goToUserCoordinates() {
+			var lon = $('#longitude').val();
+			var lat = $('#latitude').val();
+			goToCoordinates(lon, lat, defaultZoom);
+		}
+	
+		function goToCoordinates(lon, lat, zoom) {
+			var lonLat = new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+			map.setCenter(lonLat, zoom);
 		}
 	
 		function loadFile() {
 			//var osmFile = $('#browse_osm_file_button').val();
 			var osmFile = $('#browse_osm_file_button').files[0];
-			alert('load file: ' + osmFile);
 		}
 	
 		function populateVectorLayer() {
 			var queryString = $('#query_string').val();
-			alert('Query string: ' + queryString);
+			//alert('Query string: ' + queryString);
+			java.query(queryString);
+			
 			//cleanVectorLayer();
 			/*
 			var queryTypeParamName = "queryType";
@@ -196,7 +204,7 @@
 
 		function addListeners() {
 			$('div[#options] > #go_button').click(function() {
-				goToCoordinates();
+				goToUserCoordinates();
 			});
 			$('div[#options] > #query_button').click(function() {
 				populateVectorLayer();
@@ -248,10 +256,10 @@
 				</div>
 			-->
 				<div>
-					<label for="latitude">Latitude</label>
-					<input id="latitude" type="text"/>
 					<label for="longitude">Longitude</label>
 					<input id="longitude" type="text"/>
+					<label for="latitude">Latitude</label>
+					<input id="latitude" type="text"/>
 					<input id="go_button" type="button" value="Go" />
 				</div>
 				<div>
