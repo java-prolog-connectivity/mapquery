@@ -1,4 +1,4 @@
-package org.jpc.examples.osm.imp;
+package org.jpc.examples.osm;
 
 import static org.jpc.util.concurrent.ThreadLocalPrologEngine.getPrologEngine;
 

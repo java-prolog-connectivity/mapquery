@@ -11,7 +11,7 @@
 
 	node(Node) :- node(_, Node).
 	
-	node(Id, node(Id, Coordinates, Tags)) :- node(Id, Coordinates, Tags).
+	node(Id, node(Id, Coordinate, Tags)) :- node(Id, Coordinate, Tags).
 	
 	way(Way) :- way(_, Way).
 	

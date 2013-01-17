@@ -1,4 +1,4 @@
-package org.jpc.examples.osm;
+package org.jpc.examples.osm.model;
 
 import java.util.Map;
 

@@ -1,9 +1,11 @@
 package org.jpc.examples.osm.ui;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -32,8 +34,19 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import netscape.javascript.JSObject;
 
 import org.jpc.engine.prolog.PrologEngineConfiguration;
-import org.jpc.examples.osm.imp.MapQuery;
-import org.jpc.examples.osm.imp.OsmDataLoader;
+import org.jpc.examples.osm.MapQuery;
+import org.jpc.examples.osm.OsmDataLoader;
+import org.jpc.examples.osm.model.Coordinate;
+import org.jpc.examples.osm.model.Node;
+import org.jpc.examples.osm.model.Osm;
+import org.jpc.examples.osm.model.Way;
+import org.jpc.examples.osm.model.gsonconverters.CoordinateGsonConverter;
+import org.jpc.examples.osm.model.gsonconverters.NodeGsonConverter;
+import org.jpc.examples.osm.model.gsonconverters.OsmGsonConverter;
+import org.jpc.examples.osm.model.gsonconverters.WayGsonConverter;
+import org.jpc.examples.osm.model.imp.OsmFragment;
+import org.jpc.examples.osm.model.jpcconverters.TermToNodeConverter;
+import org.jpc.examples.osm.model.jpcconverters.TermToWayConverter;
 import org.jpc.query.Query;
 import org.jpc.term.Term;
 import org.jpc.util.LogicResourceLoader;
@@ -41,10 +54,14 @@ import org.jpc.util.PrologEngineManager;
 import org.jpc.util.concurrent.JpcCallable;
 import org.jpc.util.concurrent.JpcExecutor;
 import org.jpc.util.concurrent.JpcRunnable;
+import org.jpc.util.concurrent.OneThreadJpcExecutor;
 import org.jpc.util.concurrent.ThreadLocalPrologEngine;
 
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
+import com.google.gson.GsonBuilder;
 
 public class LogicConsole extends GridPane {
 
@@ -220,7 +237,6 @@ public class LogicConsole extends GridPane {
 										@Override
 										public void run() {
 											loadOsmFileProgress.setProgress(1);
-											enableQueryOptions();
 										}
 									});
 								} catch(RuntimeException e) {
@@ -260,7 +276,8 @@ public class LogicConsole extends GridPane {
 	
 	private Future<Boolean> initializeEngine() {
 		PrologEngineConfiguration config = getSelectedConfiguration();
-		jpcExecutor = new JpcExecutor(config);
+		jpcExecutor = new OneThreadJpcExecutor(config);
+		//jpcExecutor = new JpcExecutor(new DirectExecutorService(), config);
 		startEngineProgress.setVisible(true);
 
 		return jpcExecutor.submit(new JpcCallable<Boolean>() {
@@ -274,6 +291,7 @@ public class LogicConsole extends GridPane {
 						public void run() {
 							startEngineProgress.setProgress(1);
 							disableEngineConfigurationOptions();
+							enableQueryOptions();
 						}
 					});
 					return resourcesLoaded;
@@ -347,19 +365,39 @@ public class LogicConsole extends GridPane {
 		} catch (InterruptedException | ExecutionException e) {
 			throw new RuntimeException(e);
 		}
-		Multimap<String, Term> mapQueryResult = query.allSolutionsMultimap();
+		ListMultimap<String, Term> mapQueryResult = query.allSolutionsMultimap();
 		drawQuery(mapQueryResult);
 	}
 
-	private void drawQuery(Multimap<String, Term> mapQueryResult) {
-		Collection<Term> nodeTerms = mapQueryResult.get(NODE_VARIABLE_NAME);
-		Collection<Term> wayTerms = mapQueryResult.get(WAY_VARIABLE_NAME);
+	private void drawQuery(ListMultimap<String, Term> mapQueryResult) {
+		List<Term> nodeTerms = mapQueryResult.get(NODE_VARIABLE_NAME);
+		if(nodeTerms == null)
+			nodeTerms = new ArrayList<>();
+			List<Term> wayTerms = mapQueryResult.get(WAY_VARIABLE_NAME);
+		if(wayTerms == null)
+			wayTerms = new ArrayList<>();
 		
-		int numberNodes = nodeTerms!=null?nodeTerms.size():0;
-		int numberWays = nodeTerms!=null?wayTerms.size():0;
+		List<Node> nodes = Lists.transform(nodeTerms, new TermToNodeConverter());
+		List<Way> ways = Lists.transform(wayTerms, new TermToWayConverter());
+
+		Osm osm = new OsmFragment(nodes, ways);
 		
-		System.out.println("Number of nodes: " + numberNodes);
-		System.out.println("Number of ways: " + numberWays);
+		GsonBuilder gson = new GsonBuilder();
+		gson.registerTypeAdapter(Coordinate.class, new CoordinateGsonConverter());
+		gson.registerTypeAdapter(Node.class, new NodeGsonConverter());
+		gson.registerTypeAdapter(Way.class, new WayGsonConverter());
+		gson.registerTypeAdapter(OsmFragment.class, new OsmGsonConverter());
+		
+		//gson.setPrettyPrinting();
+		
+		String osmJson = gson.create().toJson(osm);
+		System.out.println(osmJson);
+		webEngine.executeScript("g_drawGeoJson("+osmJson+")");
+//		int numberNodes = nodes.size();
+//		int numberWays = ways.size();
+//		System.out.println("Number of nodes: " + numberNodes);
+//		System.out.println("Number of ways: " + numberWays);
+		
 	}
 
 

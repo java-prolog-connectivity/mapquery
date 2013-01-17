@@ -19,14 +19,14 @@
 		
 	tags(Tags) :- parameter(3, Tags).
 
-	near(ThatCoordinates, Km) :- once((::nodes(Nodes), list::member(Node, Nodes), Node::near(ThatCoordinates, Km))).
+	near(ThatCoordinate, Km) :- once((::nodes(Nodes), list::member(Node, Nodes), Node::near(ThatCoordinate, Km))).
 	
-	distancekm(ThatCoordinates, Distance) :- nodes(Nodes), min_distancekm(ThatCoordinates, Nodes, Distance).
+	distancekm(ThatCoordinate, Distance) :- nodes(Nodes), min_distancekm(ThatCoordinate, Nodes, Distance).
 	
-	min_distancekm(ThatCoordinates, [Node|Rest], Distance) :- Node::distancekm(ThatCoordinates, Km), min_distancekm(ThatCoordinates, Rest, Km, Distance).
+	min_distancekm(ThatCoordinate, [Node|Rest], Distance) :- Node::distancekm(ThatCoordinate, Km), min_distancekm(ThatCoordinate, Rest, Km, Distance).
 	
 	min_distancekm(_, [], Distance, Distance).
-	min_distancekm(ThatCoordinates, [Node|Rest], PreviousMinDistance, Distance) :- Node::distancekm(ThatCoordinates, NodeDistance), NewMinDistance is min(NodeDistance, PreviousMinDistance),
-	min_distancekm(ThatCoordinates, Rest, NewMinDistance, Distance).
+	min_distancekm(ThatCoordinate, [Node|Rest], PreviousMinDistance, Distance) :- Node::distancekm(ThatCoordinate, NodeDistance), NewMinDistance is min(NodeDistance, PreviousMinDistance),
+	min_distancekm(ThatCoordinate, Rest, NewMinDistance, Distance).
 
 :- end_object.

@@ -68,22 +68,23 @@
 	
 	var g_disableQueryOptions;
 	var g_enableQueryOptions;
+	var g_drawGeoJson;
 	
 	(function ($) {
 		var map;
 		var vectorLayer;
 		var features;
+		var numberZoomLevels = 16;
 		var defaultZoom = 11; //Starting zoom level
+		var geoJsonFormat;
 		
 		function initMap() {
-
-
 
 			var osm_format;
 			
 			map = new OpenLayers.Map('map_element', {
 				maxResolution: 156543.0399,
-			    numZoomLevels: 16,
+			    numZoomLevels: numberZoomLevels,
 				units: 'm', //meters
 				projection: new OpenLayers.Projection('EPSG:900913'),
 				displayProjection: new OpenLayers.Projection('EPSG:4326')});
@@ -112,14 +113,22 @@
 				{type: google.maps.MapTypeId.SATELLITE}
 			);
 
-			
-			osmFormat = new OpenLayers.Format.OSM({
+			geoJsonFormat = new OpenLayers.Format.GeoJSON({
 				'internalProjection': new OpenLayers.Projection("EPSG:900913"),
     			'externalProjection': new OpenLayers.Projection("EPSG:4326")
 			});
 			
+			vectorLayer = new OpenLayers.Layer.Vector("Vector", {
+			});
+/*
+			osmFormat = new OpenLayers.Format.OSM({
+				'internalProjection': new OpenLayers.Projection("EPSG:900913"),
+    			'externalProjection': new OpenLayers.Projection("EPSG:4326")
+			});
+*/	
 			//Initialise the vector layer using OpenLayers.Format.OSM
-			vectorLayer = new OpenLayers.Layer.Vector("Vector"); /*new OpenLayers.Layer.Vector("Brussels POIs", {
+//			vectorLayer = new OpenLayers.Layer.Vector("Vector"); 
+				/*new OpenLayers.Layer.Vector("Brussels POIs", {
  				strategies: [new OpenLayers.Strategy.Fixed()],
 				protocol: new OpenLayers.Protocol.HTTP({
 					url: "brussels_center_filtered.osm",   // relative or absolute URL to the .osm file
@@ -196,9 +205,14 @@
 			});
 			*/
 		}
+		
+		//function drawGeoJsonString(geoJsonString) {
+		function drawGeoJson(geoJson) {
+			vectorLayer.addFeatures(geoJsonFormat.read(geoJson));
+		}
+		g_drawGeoJson = drawGeoJson;
 	
 		function cleanVectorLayer() {
-			alert('clean map');
 			vectorLayer.destroyFeatures();
 		}
 
@@ -230,9 +244,9 @@
 		g_enableQueryOptions = enableQueryOptions;
 		
 		$(function() {
-			initMap();
 			addListeners();
 			disableQueryOptions();
+			initMap(); //TODO put at the beginning of the method, but inside an if block testing if there is internet connection
 		});
 
 	})(jQuery);

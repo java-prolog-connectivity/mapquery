@@ -1,8 +1,8 @@
-:- object(coordinates(_Lon,_Lat)).
+:- object(coordinate(_Lon,_Lat)).
 
 	:- info([
 		author is 'Sergio Castro',
-		comment is 'A OSM node coordinates',
+		comment is 'A OSM node coordinate',
 		parameters is [
 			'Lon' - 'The longitud of the node',
 			'Lat' - 'The latitude of the node']
@@ -14,22 +14,22 @@
 		
 		lat(Lat) :- parameter(2, Lat).
 		
-		near(Coordinates, Km) :- distancekm(Coordinates, D), D=<Km.
+		near(Coordinate, Km) :- distancekm(Coordinate, D), D=<Km.
 		
 		:- info(distancekm/2, [
 			comment is 'Equivalence between degrees and radians.',
-			argnames is ['Coordinates', 'Distance'],
+			argnames is ['Coordinate', 'Distance'],
 			bibliography is ['http://www.movable-type.co.uk/scripts/latlong.html']]).
 			
-		distancekm(Coordinates, D) :- earthRadiusKm(R),
-			lon(ThisLon), degreesAsRadians(ThisLon, ThisLonRad), Coordinates::lon(ThatLon), degreesAsRadians(ThatLon, ThatLonRad),
-			lat(ThisLat), degreesAsRadians(ThisLat, ThisLatRad), Coordinates::lat(ThatLat), degreesAsRadians(ThatLat, ThatLatRad),
+		distancekm(Coordinate, D) :- earthRadiusKm(R),
+			lon(ThisLon), degreesAsRadians(ThisLon, ThisLonRad), Coordinate::lon(ThatLon), degreesAsRadians(ThatLon, ThatLonRad),
+			lat(ThisLat), degreesAsRadians(ThisLat, ThisLatRad), Coordinate::lat(ThatLat), degreesAsRadians(ThatLat, ThatLatRad),
 			X is (ThatLonRad-ThisLonRad)*cos((ThisLatRad+ThatLatRad)/2),
 			Y is ThatLatRad-ThisLatRad,
 			hypotenuse(X,Y,Hyp),
 			D is Hyp*R.
 		
-		distancem(Coordinates, D) :- distancekm(Coordinates, Dkm), D is Dkm*1000.
+		distancem(Coordinate, D) :- distancekm(Coordinate, Dkm), D is Dkm*1000.
 		
 		earthRadiusKm(6371). %earth's mean radius in km
 		

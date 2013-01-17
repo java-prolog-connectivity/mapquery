@@ -2,7 +2,6 @@ package org.jpc.examples.osm;
 
 import static junit.framework.Assert.assertTrue;
 
-import org.jpc.examples.osm.imp.MapQuery;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;

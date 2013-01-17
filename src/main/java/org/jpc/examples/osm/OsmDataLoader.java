@@ -1,12 +1,10 @@
-package org.jpc.examples.osm.imp;
+package org.jpc.examples.osm;
 
 import static org.jpc.engine.prolog.PrologConstants.CONS_FUNCTOR;
 import static org.jpc.engine.prolog.PrologConstants.EMPTY_LIST_SYMBOL;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,8 +13,10 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.jpc.engine.prolog.PrologEngine;
+import org.jpc.examples.osm.model.imp.CoordinateJpc;
+import org.jpc.examples.osm.model.imp.NodeJpc;
+import org.jpc.examples.osm.model.imp.WayJpc;
 import org.jpc.salt.PrologEngineWriter;
-import org.jpc.salt.PrologStreamWriter;
 import org.jpc.salt.PrologWriter;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -55,8 +55,6 @@ public class OsmDataLoader {
 	}
 
 	public void load(File resourceFile) {
-		
-
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 		
 //		try(PrintStream ps = new PrintStream("brussels_center_filtered.lgt")) {
@@ -80,29 +78,27 @@ public class OsmDataLoader {
 		}
 	}
 	
-	
-	
 	class OsmSaxHandler extends DefaultHandler {
 		private int tagsCounter;
 		private int nodeReferenceCounter;
 		@Override
 		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 			if(qName.equals(NODE_ELEMENT)) {
-				writer.startCompound().startAtom(NodeImp.NODE_FUNCTOR); //to be closed later in the endElement method
+				writer.startCompound().startAtom(NodeJpc.NODE_FUNCTOR); //to be closed later in the endElement method
 				String id = attributes.getValue(ID_ATTRIBUTE);
-				writer.startAtom(id);
+				writer.startIntegerTerm(Long.parseLong(id));
 				String lat = attributes.getValue(LAT_NODE_ATTRIBUTE);
 				String lon = attributes.getValue(LON_NODE_ATTRIBUTE);
-				writer.startCompound().startAtom(CoordinatesImp.COORDINATES_FUNCTOR).startFloatTerm(Double.parseDouble(lat)).startFloatTerm(Double.parseDouble(lon)).endCompound();
+				writer.startCompound().startAtom(CoordinateJpc.COORDINATE_FUNCTOR).startFloatTerm(Double.parseDouble(lon)).startFloatTerm(Double.parseDouble(lat)).endCompound();
 			} else if(qName.equals(WAY_ELEMENT)) {
-				writer.startCompound().startAtom(WayImp.WAY_FUNCTOR); //to be closed later in the endElement method
+				writer.startCompound().startAtom(WayJpc.WAY_FUNCTOR); //to be closed later in the endElement method
 				String id = attributes.getValue(ID_ATTRIBUTE);
-				writer.startAtom(id);
+				writer.startIntegerTerm(Long.parseLong(id));
 			} else if(qName.equals(NODE_REFERENCE_ELEMENT)) {
 				nodeReferenceCounter++;
 				String ref = attributes.getValue(REFERENCE_ATTRIBUTE);
 				writer.startCompound().startAtom(".");
-				writer.startAtom(ref);
+				writer.startIntegerTerm(Long.parseLong(ref));
 			} else if(qName.equals(TAG_ELEMENT)) {
 				if(nodeReferenceCounter > 0) {
 					writer.startAtom(EMPTY_LIST_SYMBOL);

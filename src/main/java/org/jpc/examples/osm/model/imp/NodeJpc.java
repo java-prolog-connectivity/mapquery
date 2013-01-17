@@ -1,59 +1,58 @@
-package org.jpc.examples.osm.imp;
+package org.jpc.examples.osm.model.imp;
 
 import static java.util.Arrays.asList;
 import static org.jpc.util.concurrent.ThreadLocalPrologEngine.getPrologEngine;
 
-import java.util.List;
 import java.util.Map;
 
-import org.jpc.converter.toterm.tolistterm.IterableToTermConverter;
 import org.jpc.converter.toterm.tolistterm.MapToTermConverter;
 import org.jpc.engine.logtalk.LogtalkObject;
-import org.jpc.examples.osm.Coordinates;
-import org.jpc.examples.osm.Way;
+import org.jpc.examples.osm.model.Coordinate;
+import org.jpc.examples.osm.model.Node;
 import org.jpc.query.Query;
-import org.jpc.term.Atom;
 import org.jpc.term.Compound;
 import org.jpc.term.IntegerTerm;
 import org.jpc.term.Term;
 import org.jpc.term.Variable;
 
-public class WayImp implements Way {
+public class NodeJpc implements Node {
 
-	public static final String WAY_FUNCTOR = "way"; //way prolog functor
-	
-	private String id;
-	private List<String> nodesIds;
+	public static final String NODE_FUNCTOR = "node"; //node prolog functor
+
+	private Long id;
+	private Coordinate coordinate;
 	private Map<String,String> tags;
-	
-	public WayImp(String id, List<String> nodesIds, Map<String,String> tags) {
+
+	public NodeJpc(Long id, Coordinate coordinate, Map<String,String> tags) {
 		this.id = id;
-		this.nodesIds = nodesIds;
+		this.coordinate = coordinate;
 		this.tags = tags;
 	}
 	
 	@Override
-	public String getId() {
+	public Long getId() {
 		return id;
 	}
 
 	@Override
-	public List<String> getNodesIds() {
-		return nodesIds;
+	public Coordinate getCoordinate() {
+		return coordinate;
 	}
+
 
 	@Override
 	public Map<String, String> getTags() {
 		return tags;
 	}
 
+	
 	@Override
 	public Term asTerm() {
-		return new Compound(WAY_FUNCTOR, asList(new Atom(id), new IterableToTermConverter().apply(nodesIds), new MapToTermConverter().apply(tags)));
+		return new Compound(NODE_FUNCTOR, asList(new IntegerTerm(id), coordinate, new MapToTermConverter().apply(tags)));
 	}
 
 	@Override
-	public long distanceKm(Coordinates other) {
+	public long distanceKm(Coordinate other) {
 		String distanceVarName = "Distance";
 		Term message = new Compound("distancekm", asList(other, new Variable(distanceVarName)));
 		Query query = new LogtalkObject(this, getPrologEngine()).perform(message);
@@ -61,10 +60,11 @@ public class WayImp implements Way {
 	}
 
 	@Override
-	public boolean near(Coordinates other, long deltaKm) {
+	public boolean near(Coordinate other, long deltaKm) {
 		Term message = new Compound("near", asList(other, new IntegerTerm(deltaKm)));
 		Query query = new LogtalkObject(this, getPrologEngine()).perform(message);
 		return query.hasSolution();
 	}
-
+	
+	
 }
