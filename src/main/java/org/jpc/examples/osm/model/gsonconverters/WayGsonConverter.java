@@ -26,7 +26,7 @@ public class WayGsonConverter implements JsonSerializer<Way> {
 		JsonArray jsonCoordinates = new JsonArray();
 		
 		for(Node node : way.nodes()) {
-			jsonCoordinates.add(new NodeGsonConverter().serialize(node, node.getClass(), context));
+			jsonCoordinates.add(new CoordinateGsonConverter().serialize(node.getCoordinate(), node.getCoordinate().getClass(), context));
 		}
 		jsonGeometry.add(GeoJsonConstants.COORDINATES, jsonCoordinates);
 		

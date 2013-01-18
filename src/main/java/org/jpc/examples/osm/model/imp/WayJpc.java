@@ -48,10 +48,10 @@ public class WayJpc implements Way {
 	 * @return
 	 */
 	public List<Node> nodes() {
-		String nodesVarName = "Node";
-		Term message = new Compound("nodes", asList(new Variable(nodesVarName)));
+		String nodeVarName = "Node";
+		Term message = new Compound("node", asList(new Variable(nodeVarName)));
 		Query query = new LogtalkObject(this, getPrologEngine()).perform(message);
-		return query.select(nodesVarName).adapt(new TermToNodeConverter()).allSolutions();
+		return query.select(nodeVarName).adapt(new TermToNodeConverter()).allSolutions();
 	}
 	
 	@Override

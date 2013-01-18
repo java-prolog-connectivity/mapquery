@@ -9,14 +9,16 @@
 			'Tags' - 'The tags of the way']
 			]).
 
-	:- public([id/1, nodes_ids/1, nodes/1, tags/1, tag/2, near/2, distancekm/2]).
+	:- public([id/1, nodes_ids/1, nodes/1, node/1, distancekm/2, near/2]).
 	
 	id(Id) :- parameter(1, Id).
 		
 	nodes_ids(NodesIds) :- parameter(2, NodesIds).
 		
 	nodes(Nodes) :- nodes_ids(NodesIds), findall(Node, (list::member(NodeId, NodesIds), osm::node(NodeId, Node)), Nodes).
-		
+	
+	node(Node) :- nodes(Nodes), list::member(Node, Nodes).
+	
 	tags(Tags) :- parameter(3, Tags).
 
 	near(ThatCoordinate, Km) :- once((::nodes(Nodes), list::member(Node, Nodes), Node::near(ThatCoordinate, Km))).
