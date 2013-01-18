@@ -20,7 +20,7 @@ import javafx.stage.StageStyle;
  * http://stackoverflow.com/questions/11794987/what-is-replacement-of-alert-in-javafx-2-1-alert-is-in-javafx-1-3-but-not-in-j
  * http://stackoverflow.com/questions/8309981/how-to-create-and-show-common-dialog-error-warning-confirmation-in-javafx-2
  * 
- * In the meanwhile this class creates a simple dialog. It should be replaced when a simple javafx alternative is available
+ * In the meanwhile this class creates a simple dialog. It should be replaced when a simple native javafx alternative is available in the near future
  * @author sergioc
  *
  */

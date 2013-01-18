@@ -8,7 +8,7 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
     private Scene scene;
-    private LogicConsole logicConsole;
+    private ConsolePane logicConsole;
     private OsmBrowser browser;
     
     @Override public void start(Stage stage) {
@@ -19,21 +19,17 @@ public class Main extends Application {
         //vbox.setPadding(new Insets(10));
         //vbox.setSpacing(8);
         browser = new OsmBrowser();
-        logicConsole = new LogicConsole(browser.getEngine());
+        logicConsole = new ConsolePane(browser.getEngine());
         borderPane.setTop(logicConsole);
         borderPane.setBottom(browser);
         scene = new Scene(borderPane,Color.web("#CAE1FF"));
-        
         stage.setScene(scene);  
-
-        
         stage.show();
     }
  
     @Override public void stop() {
     	//a call to super is not needed since according to the documentation: "The implementation of this method provided by the Application class does nothing."
-    	if(logicConsole.getJpcExecutor() != null)
-    		logicConsole.getJpcExecutor().shutdownNow();
+    	logicConsole.freeResources();
     }
     
     public static void main(String[] args){

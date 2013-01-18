@@ -24,21 +24,21 @@
 
 	h1 {
 		letter-spacing: -2px;
-		font-size: 2.8em;
+		font-size: 2.2em;
 		color: #444444;
 	}
 
 	h2 {
-		font-size: 2.1em;
+		font-size: 1.8em;
 		color: #222222;
 	}
 
 	h3 {
-		font-size: 1.5em;
+		font-size: 1.4em;
 		color: #111111;
 	}
 	
-	.help {
+	.help-menu {
 		/*background: #DBDBDB;*/
 		text-align: left;
 		cursor: pointer;
@@ -66,8 +66,8 @@
 	<script type='text/javascript' src='js/OpenLayers-2.12/OpenLayers.js'></script>
 	<script type='text/javascript'>
 	
-	var g_disableQueryOptions;
-	var g_enableQueryOptions;
+	//var g_disableQueryOptions;
+	//var g_enableQueryOptions;
 	var g_drawGeoJson;
 	
 	(function ($) {
@@ -185,27 +185,12 @@
 			//var osmFile = $('#browse_osm_file_button').val();
 			var osmFile = $('#browse_osm_file_button').files[0];
 		}
-	
+	/*
 		function populateVectorLayer() {
 			var queryString = $('#query_string').val();
-			//alert('Query string: ' + queryString);
 			java.query(queryString);
-			
-			//cleanVectorLayer();
-			/*
-			var queryTypeParamName = "queryType";
-			var queryStringParamName = "queryString";
-
-			OpenLayers.Request.GET({
-			    url: "features_data?"+queryTypeParamName+"="+queryType+"&amp;"+queryStringParamName+"="+queryString,
-			    success: function(e) {
-			        features = osmFormat.read(e.responseText);
-			        vectorLayer.addFeatures(features);
-			    }
-			});
-			*/
 		}
-		
+	*/	
 		//function drawGeoJsonString(geoJsonString) {
 		function drawGeoJson(geoJson) {
 			vectorLayer.addFeatures(geoJsonFormat.read(geoJson));
@@ -220,19 +205,22 @@
 			$('div[#options] > #go_button').click(function() {
 				goToUserCoordinates();
 			});
+			/*
 			$('div[#options] > #query_button').click(function() {
 				populateVectorLayer();
 			});
+			*/
 			$('div[#options] > #clear_map_button').click(function() {
 				cleanVectorLayer();
 			});
 			
 			
-			$('div.help').click(function() {
+			$('div.help-menu').click(function() {
 				$(this).next().toggle('slow');
 			});
 		}
 		
+		/*
 		function disableQueryOptions() {
 			$('.query-option').attr('disabled', 'disabled');
 		}
@@ -242,10 +230,11 @@
 			$('.query-option').removeAttr('disabled');
 		}
 		g_enableQueryOptions = enableQueryOptions;
+		*/
 		
 		$(function() {
 			addListeners();
-			disableQueryOptions();
+			//disableQueryOptions();
 			initMap(); //TODO put at the beginning of the method, but inside an if block testing if there is internet connection
 		});
 
@@ -276,20 +265,21 @@
 					<input id="latitude" type="text"/>
 					<input id="go_button" type="button" value="Go" />
 				</div>
-				<div>
-					<textarea id="query_string" class="query-option" rows="3" cols="68"></textarea><br />
-					<input id="query_button" class="query-option" type="button" value="Query" />
-					<input id="clear_map_button" class="query-option" type="button" value="Clear map" />
-				</div>
 			</div>
 			<div id="map_element" style="width: 500px; height: 500px;"></div>
+			<div>
+				<!--
+				<textarea id="query_string" class="query-option" rows="3" cols="68"></textarea><br />
+				<input id="query_button" class="query-option" type="button" value="Query" />
+				-->
+				<input id="clear_map_button" class="query-option" type="button" value="Clear POIs" />
+			</div>
 		</div>
-		<div id="right" style="float: right;">
-			<div class="help"><h1>Help</h1></div>
+		<div id="right" style="float: left;">
+			<div class="help-menu"><h1>Help</h1></div>
 			<div class="help-content">
 				<h2>Logic Variables</h2>
-				<p>Node</p>
-				<p>Way</p>
+				<p>Node, Way</p>
 				<h2>Logic Predicates</h2>
 				<h3>osm/0</h3>
 				<p>node/3, node/2, node/1, way/3, way/2, way/1</p>
@@ -300,6 +290,12 @@
 				<h3>coordinates/2</h3>
 				<p>lon/1, lat/1, distancekm/2, distancem/2, near/2</p>
 			</div>
+			<!--
+			<div class="help-menu"><h1>Examples</h1></div>
+			<div class="help-content">
+				
+			</div>
+			-->
 		</div>
 	</div>
 

@@ -2,14 +2,7 @@ package org.jpc.examples.osm.ui;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import javafx.application.Platform;
@@ -20,13 +13,11 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.web.WebEngine;
 import javafx.stage.FileChooser;
@@ -50,109 +41,79 @@ import org.jpc.examples.osm.model.jpcconverters.TermToWayConverter;
 import org.jpc.query.Query;
 import org.jpc.term.Term;
 import org.jpc.util.LogicResourceLoader;
-import org.jpc.util.PrologEngineManager;
 import org.jpc.util.concurrent.JpcCallable;
 import org.jpc.util.concurrent.JpcExecutor;
 import org.jpc.util.concurrent.JpcRunnable;
 import org.jpc.util.concurrent.OneThreadJpcExecutor;
 import org.jpc.util.concurrent.ThreadLocalPrologEngine;
+import org.jpc.util.ui.PrologConfigurationChooserPane;
+import org.jpc.util.ui.QueryPane;
 
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multiset;
 import com.google.gson.GsonBuilder;
 
-public class LogicConsole extends GridPane {
-
-	public static final Font TITLE_FONT = Font.font("Helvetica", FontWeight.NORMAL, 20); //TODO move this to a style file
+public class ConsolePane extends VBox {
 	
+	public static final String JAVA_SCRIPT_INTERFACE_VARIABLE = "java"; //the name of the javascript variable that will be created in the browser to refer to methods in this class
 	public static final String NODE_VARIABLE_NAME = "Node";
 	public static final String WAY_VARIABLE_NAME = "Way";
 	
 	private JpcExecutor jpcExecutor;
+	private final Button loadOsmFileButton;
+	private final ProgressIndicator loadOsmFileProgress;
+	private final Button startEngineButton;
+	private final ProgressIndicator startEngineProgress;
+	private final PrologConfigurationChooserPane configurationChooserPane;
+	private final QueryPane queryPane;
+	private final WebEngine webEngine;
 	
-	final Multimap<String, PrologEngineConfiguration> groupedEngineConfigurations;
-	final ComboBox prologEnginesComboBox;
-	final ComboBox bridgeLibraryComboBox;
-	final Button startEngineButton;
-	final ProgressIndicator startEngineProgress;
-	final ProgressIndicator loadOsmFileProgress;
-	
-	//private OsmBrowser osmBrowser;
-	final private WebEngine webEngine;
-	
-	public LogicConsole(final WebEngine webEngine) {
+	public ConsolePane(final WebEngine webEngine) {
 		this.webEngine = webEngine;
 		webEngine.getLoadWorker().stateProperty().addListener(new ChangeListener<State>() {
 			@Override
 			public void changed(ObservableValue<? extends State> ov, State oldState, State newState) {
 				if (newState == State.SUCCEEDED) {
 					JSObject win = (JSObject)webEngine.executeScript("window"); //this and the following instruction should be executed only after the web page has been completely loaded
-					win.setMember("java", new BrowserInterface());
+					win.setMember(JAVA_SCRIPT_INTERFACE_VARIABLE, new BrowserInterface());
 				}
 			}
 		});
-		
-		PrologEngineManager manager = PrologEngineManager.getDefault();
-		manager.register(PrologEngineManager.findConfigurations());
-		groupedEngineConfigurations = manager.groupByPrologEngine();
-		final Multiset<String> prologEnginesMultiset = groupedEngineConfigurations.keys();
-		SortedSet<String> prologEngines = new TreeSet<>(Arrays.asList(prologEnginesMultiset.toArray(new String[]{})));
-		
+
 		//setAlignment(Pos.CENTER);
-		setHgap(10);
-		setVgap(10);
-		setPadding(new Insets(25, 25, 25, 25));
+		//setHgap(10);
+		//setVgap(10);
+		setPadding(new Insets(5, 20, 5, 20));
 		
-		Text logicConsoleTitle = new Text("Logic Console settings");
-		logicConsoleTitle.setFont(TITLE_FONT);
-		add(logicConsoleTitle, 0, 0, 2, 1);
+		Text logicConsoleTitle = new Text("Prolog Console settings");
+		logicConsoleTitle.setFont(DefaultStyle.TITLE_FONT);
+		getChildren().add(createTitleHBox(logicConsoleTitle));
 		
-		
-		prologEnginesComboBox = new ComboBox();
-		bridgeLibraryComboBox = new ComboBox();
-		
-		prologEnginesComboBox.valueProperty().addListener(new ChangeListener<String>() {
+		HBox configElements = createHBox();
+		configurationChooserPane = new PrologConfigurationChooserPane();
+		configElements.getChildren().add(configurationChooserPane);
 
-			@Override
-			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-				if(!newValue.equals(oldValue)) {
-					Set<String> bridgeLibraries = new HashSet<>();
-					String selectedPrologEngine = (String) prologEnginesComboBox.getValue();
-					Collection<PrologEngineConfiguration> prologEngineConfigurations = groupedEngineConfigurations.get(selectedPrologEngine);
-					for(PrologEngineConfiguration prologEngineConfiguration : prologEngineConfigurations) {
-						bridgeLibraries.add(prologEngineConfiguration.getLibraryName());
-					}
-					bridgeLibraryComboBox.getItems().clear();
-					bridgeLibraryComboBox.getItems().addAll(bridgeLibraries);
-					if(!bridgeLibraries.isEmpty()) {
-						bridgeLibraryComboBox.setValue(bridgeLibraries.iterator().next());
-					}	
-				}
-			}
-		});
 		
-		prologEnginesComboBox.getItems().addAll(prologEngines);
-
-		add(new Label("Engine:"), 0,1);
-		add(prologEnginesComboBox, 1,1);
-		add(new Label("Library:"), 2,1);
-		add(bridgeLibraryComboBox, 3,1);
 		
 		startEngineButton = new Button("Start");
 		startEngineProgress = new ProgressIndicator();
-		
+		startEngineProgress.setVisible(false);
+
 		startEngineButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
 				initializeEngine();
 			}
 		});
+
+		configElements.getChildren().addAll(startEngineButton, startEngineProgress);
 		
-		add(startEngineButton, 0,2);
-		add(startEngineProgress, 1,2);
-		startEngineProgress.setVisible(false);
+//		configElements.getChildren().add(startEngineButton);
+//		configElements.getChildren().add(startEngineProgress);
+		
+		getChildren().add(configElements);
+		
+
 		
 		
 		final TextField fileTextField = new TextField();
@@ -165,8 +126,7 @@ public class LogicConsole extends GridPane {
 				//FileChooserBuilder fcb = FileChooserBuilder.create();
 				//String currentDir = System.getProperty("user.dir") + File.separator;
 				//FileChooser fc = fcb.title("Open Dialog").initialDirectory(new File(currentDir)).extensionFilters(ef).build();
-				
-				
+
 				FileChooser fc = new FileChooser();
 				fc.setTitle("Open Dialog");
 				fc.getExtensionFilters().add(ef);
@@ -182,10 +142,11 @@ public class LogicConsole extends GridPane {
 	            	file = new File(currentDir);
 	            	//System.out.println(file.exists());
 	            	//System.out.println(file.isDirectory());
+	            	System.out.println(file.canRead());
 	            	fc.setInitialDirectory(file);
 	            }
 
-				File selectedFile = fc.showOpenDialog(LogicConsole.this.getScene().getWindow());
+				File selectedFile = fc.showOpenDialog(ConsolePane.this.getScene().getWindow());
 				if(selectedFile != null) {
 					file = selectedFile; //so next time the dialog will open in the same directory
 					fileTextField.setText(selectedFile.getAbsolutePath());
@@ -194,10 +155,11 @@ public class LogicConsole extends GridPane {
 			
 		});
 
-		Button loadFileButton = new Button("Import");
+		loadOsmFileButton = new Button("Import");
 		loadOsmFileProgress = new ProgressIndicator();
+		loadOsmFileProgress.setVisible(false);
 		
-		loadFileButton.setOnAction(new EventHandler<ActionEvent>() {
+		loadOsmFileButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
 				final String osmFile = fileTextField.getText().trim();
@@ -205,8 +167,10 @@ public class LogicConsole extends GridPane {
 					SimpleDialog.error("Please select a file with OSM data to load").showDialog();
 				else {
 					if(jpcExecutor == null) {
-						if(verifyPrologEngineSelection()) {
+						if(configurationChooserPane.verifyPrologEngineSelection()) {
 							initializeEngine();
+						} else {
+							SimpleDialog.error("Please select a logic engine and a bridge library.").showDialog();
 						}
 
 //						boolean resultInitialization;
@@ -255,19 +219,45 @@ public class LogicConsole extends GridPane {
 			}
 		});
 		
-		add(new Label("OSM file:"), 0,3);
-		add(fileTextField, 1,3,2,1);
-		add(browseFileButton, 3,3);
-		add(loadFileButton, 0,4);
-		add(loadOsmFileProgress, 1,4);
-		loadOsmFileProgress.setVisible(false);
-		//progress.setDisable(true);
-		if(!prologEngines.isEmpty()) {
-			//prologEnginesComboBox.set
-			prologEnginesComboBox.setValue(prologEngines.iterator().next());
-		} else {
-			SimpleDialog.warning("Impossible to find available logic engines. The application will not work correctly.").showDialog();
-		}
+		HBox osmFileOptions = createHBox();
+		osmFileOptions.getChildren().add(new Label("OSM file:"));
+		
+		HBox fileChooser = new HBox();
+		fileChooser.getChildren().add(fileTextField);
+		fileChooser.getChildren().add(browseFileButton);
+		osmFileOptions.getChildren().add(fileChooser);
+		osmFileOptions.getChildren().add(loadOsmFileButton);
+		osmFileOptions.getChildren().add(loadOsmFileProgress);
+		getChildren().add(osmFileOptions);
+
+		
+		
+		queryPane = new QueryPane();
+		getChildren().add(createHBox(queryPane));
+		
+		
+		queryPane.allSolutionsButton.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				String queryText = queryPane.queryText.getText();
+				query(queryText);
+			}
+		});
+	}
+	
+	public HBox createTitleHBox(Text title) {
+		HBox hBox = new HBox();
+		hBox.setPadding(new Insets(10,0,10,0));
+		hBox.getChildren().add(title);
+		return hBox;
+	}
+	
+	public HBox createHBox(javafx.scene.Node ...children) {
+		HBox hBox = new HBox();
+		hBox.setPadding(new Insets(0,10,0,10));
+		hBox.setSpacing(10);
+		hBox.getChildren().addAll(children);
+		return hBox; 
 	}
 	
 	public JpcExecutor getJpcExecutor() {
@@ -275,7 +265,7 @@ public class LogicConsole extends GridPane {
 	}
 	
 	private Future<Boolean> initializeEngine() {
-		PrologEngineConfiguration config = getSelectedConfiguration();
+		PrologEngineConfiguration config = configurationChooserPane.getSelectedConfiguration();
 		jpcExecutor = new OneThreadJpcExecutor(config);
 		//jpcExecutor = new JpcExecutor(new DirectExecutorService(), config);
 		startEngineProgress.setVisible(true);
@@ -308,65 +298,42 @@ public class LogicConsole extends GridPane {
 		});
 	}
 	
-	private PrologEngineConfiguration getSelectedConfiguration() {
-		String prologEngineName = (String)prologEnginesComboBox.getValue();
-		Collection<PrologEngineConfiguration> configurations = groupedEngineConfigurations.get(prologEngineName);
-		String libraryName = (String) bridgeLibraryComboBox.getValue();
-		for(PrologEngineConfiguration config : configurations) {
-			if(config.getLibraryName().equals(libraryName))
-				return config;
-		}
-		return null;
-	}
-	
-	/**
-	 * Verify that a logic engine can be instantiated, otherwise shows an error message
-	 * @return true if a logic engine can be instantiated, false otherwise
-	 */
-	private boolean verifyPrologEngineSelection() {
-		if(((String)prologEnginesComboBox.getValue()).trim().isEmpty() || ((String)bridgeLibraryComboBox.getValue()).trim().isEmpty()) {
-			SimpleDialog.error("Please select a logic engine and a bridge library.").showDialog();
-			return false;
-		} else
-			return true;
-	}
+
 	
 	public void disableEngineConfigurationOptions() {
 		startEngineButton.setDisable(true);
-		prologEnginesComboBox.setDisable(true);
-		bridgeLibraryComboBox.setDisable(true);
+		configurationChooserPane.disableEngineConfigurationOptions();
 	}
 	
 	public void disableQueryOptions() {
-		webEngine.executeScript("g_disableQueryOptions()");
+		queryPane.disable();
 	}
 
 	public void enableQueryOptions() {
-		webEngine.executeScript("g_enableQueryOptions()");
+		queryPane.enable();
 	}
 	
 	private class BrowserInterface {
 		public void query(String queryString) {
-			LogicConsole.this.query(queryString);
+			ConsolePane.this.query(queryString);
 		}
 	}
 	
 	public void query(final String queryString) {
-		System.out.println("message received");
-		System.out.println(queryString);
-		Query query;
 		try {
-			query = jpcExecutor.submit(new JpcCallable<Query>() {
+			jpcExecutor.submit(new JpcCallable<ListMultimap<String, Term>>() {
 				@Override
-				public Query call() throws Exception {
-					return getPrologEngine().query(queryString);
+				public ListMultimap<String, Term> call() throws Exception {
+					Query query = getPrologEngine().query(queryString);
+					ListMultimap<String, Term> mapQueryResult = query.allSolutionsMultimap();
+					drawQuery(mapQueryResult);
+					return mapQueryResult;
 				}
-			}).get();
-		} catch (InterruptedException | ExecutionException e) {
-			throw new RuntimeException(e);
+			});
+		} catch (RuntimeException e) {
+			throw e;
 		}
-		ListMultimap<String, Term> mapQueryResult = query.allSolutionsMultimap();
-		drawQuery(mapQueryResult);
+		
 	}
 
 	private void drawQuery(ListMultimap<String, Term> mapQueryResult) {
@@ -380,6 +347,12 @@ public class LogicConsole extends GridPane {
 		List<Node> nodes = Lists.transform(nodeTerms, new TermToNodeConverter());
 		List<Way> ways = Lists.transform(wayTerms, new TermToWayConverter());
 
+		int numberNodes = nodes.size();
+		int numberWays = ways.size();
+		System.out.println("Number of nodes: " + numberNodes);
+		System.out.println("Number of ways: " + numberWays);
+		
+		
 		Osm osm = new OsmFragment(nodes, ways);
 		
 		GsonBuilder gson = new GsonBuilder();
@@ -390,16 +363,25 @@ public class LogicConsole extends GridPane {
 		
 		//gson.setPrettyPrinting();
 		
-		String osmJson = gson.create().toJson(osm);
-		System.out.println(osmJson);
-		webEngine.executeScript("g_drawGeoJson("+osmJson+")");
-//		int numberNodes = nodes.size();
-//		int numberWays = ways.size();
-//		System.out.println("Number of nodes: " + numberNodes);
-//		System.out.println("Number of ways: " + numberWays);
+		final String osmJson = gson.create().toJson(osm);
+		
+		Platform.runLater(new Runnable() {
+
+			@Override
+			public void run() {
+				System.out.println(osmJson);
+				System.out.println("preparing to draw...");
+				webEngine.executeScript("g_drawGeoJson("+osmJson+")");
+				System.out.println("done drawing! ...");
+			}
+			
+		});
 		
 	}
 
-
+	public void freeResources() {
+		if(jpcExecutor != null)
+			jpcExecutor.shutdownNow();
+	}
 
 }
