@@ -3,15 +3,13 @@ package org.jpc.examples.osm.model;
 import java.util.List;
 import java.util.Map;
 
-import org.jpc.term.TermConvertable;
-
-public interface Way extends Taggeable, TermConvertable {
+public interface Way extends Taggeable {
 
 	public Long getId();
 	
 	public List<Node> nodes();
 	
-	public List<String> getNodesIds();
+	public List<Long> getNodesIds();
 	
 	public Map<String, String> getTags();
 	

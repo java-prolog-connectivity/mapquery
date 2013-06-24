@@ -3,9 +3,7 @@ package org.jpc.examples.osm.model;
 import java.util.List;
 import java.util.Map;
 
-import org.jpc.term.TermConvertable;
-
-public interface OsmService extends Osm, TermConvertable  {
+public interface OsmService extends Osm {
 
 	public List<Node> getNodes(Map<String, String> tags);
 	

@@ -13,9 +13,9 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.jpc.engine.prolog.PrologEngine;
-import org.jpc.examples.osm.model.imp.CoordinateJpc;
-import org.jpc.examples.osm.model.imp.NodeJpc;
-import org.jpc.examples.osm.model.imp.WayJpc;
+import org.jpc.examples.osm.model.jpcconverters.CoordinateJpcConverter;
+import org.jpc.examples.osm.model.jpcconverters.NodeJpcConverter;
+import org.jpc.examples.osm.model.jpcconverters.WayJpcConverter;
 import org.jpc.salt.PrologEngineWriter;
 import org.jpc.salt.PrologWriter;
 import org.xml.sax.Attributes;
@@ -84,14 +84,14 @@ public class OsmDataLoader {
 		@Override
 		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 			if(qName.equals(NODE_ELEMENT)) {
-				writer.startCompound().startAtom(NodeJpc.NODE_FUNCTOR); //to be closed later in the endElement method
+				writer.startCompound().startAtom(NodeJpcConverter.NODE_FUNCTOR); //to be closed later in the endElement method
 				String id = attributes.getValue(ID_ATTRIBUTE);
 				writer.startIntegerTerm(Long.parseLong(id));
 				String lat = attributes.getValue(LAT_NODE_ATTRIBUTE);
 				String lon = attributes.getValue(LON_NODE_ATTRIBUTE);
-				writer.startCompound().startAtom(CoordinateJpc.COORDINATE_FUNCTOR).startFloatTerm(Double.parseDouble(lon)).startFloatTerm(Double.parseDouble(lat)).endCompound();
+				writer.startCompound().startAtom(CoordinateJpcConverter.COORDINATE_FUNCTOR).startFloatTerm(Double.parseDouble(lon)).startFloatTerm(Double.parseDouble(lat)).endCompound();
 			} else if(qName.equals(WAY_ELEMENT)) {
-				writer.startCompound().startAtom(WayJpc.WAY_FUNCTOR); //to be closed later in the endElement method
+				writer.startCompound().startAtom(WayJpcConverter.WAY_FUNCTOR); //to be closed later in the endElement method
 				String id = attributes.getValue(ID_ATTRIBUTE);
 				writer.startIntegerTerm(Long.parseLong(id));
 			} else if(qName.equals(NODE_REFERENCE_ELEMENT)) {

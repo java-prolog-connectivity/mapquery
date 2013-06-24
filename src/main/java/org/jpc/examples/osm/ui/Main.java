@@ -6,6 +6,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+import org.jpc.commons.prologbrowser.ui.QueryBrowserPane;
+import org.jpc.engine.provider.PrologEngineProviderManager;
+
 public class Main extends Application {
     private Scene scene;
     private ConsolePane logicConsole;
@@ -19,9 +22,15 @@ public class Main extends Application {
         //vbox.setPadding(new Insets(10));
         //vbox.setSpacing(8);
         browser = new OsmBrowser();
-        logicConsole = new ConsolePane(browser.getEngine());
-        borderPane.setTop(logicConsole);
-        borderPane.setBottom(browser);
+        QueryBrowserPane queryBrowserPane = new QueryBrowserPane(this, null);
+        PrologEngineProviderManager.setPrologEngineProvider(queryBrowserPane.getLogicConsolePane().getPrologEngineChoiceModel());
+        queryBrowserPane.getSettingsPane().getModel().preloadLogtalkProperty().set(true);
+        queryBrowserPane.showSettings(false);
+        logicConsole = new ConsolePane(browser.getEngine(), queryBrowserPane);
+        borderPane.setLeft(logicConsole);
+        borderPane.setRight(browser);
+//        borderPane.setTop(logicConsole);
+//        borderPane.setBottom(browser);
         scene = new Scene(borderPane,Color.web("#CAE1FF"));
         stage.setScene(scene);  
         stage.show();
@@ -29,7 +38,7 @@ public class Main extends Application {
  
     @Override public void stop() {
     	//a call to super is not needed since according to the documentation: "The implementation of this method provided by the Application class does nothing."
-    	logicConsole.freeResources();
+    	logicConsole.stop();
     }
     
     public static void main(String[] args){

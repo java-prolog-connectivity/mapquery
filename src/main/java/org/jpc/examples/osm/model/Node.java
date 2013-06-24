@@ -2,9 +2,7 @@ package org.jpc.examples.osm.model;
 
 import java.util.Map;
 
-import org.jpc.term.TermConvertable;
-
-public interface Node extends Taggeable, TermConvertable {
+public interface Node extends Taggeable {
 
 	public Long getId();
 	

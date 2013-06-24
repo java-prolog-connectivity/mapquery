@@ -1,7 +1,5 @@
 package org.jpc.examples.osm.ui;
 
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 
 /**
  * TODO move the content of this file to a style file
@@ -10,6 +8,6 @@ import javafx.scene.text.FontWeight;
  */
 public class DefaultStyle {
 
-	public static final Font TITLE_FONT = Font.font("Helvetica", FontWeight.NORMAL, 20); 
+	//public static final Font TITLE_FONT = Font.font("Helvetica", FontWeight.NORMAL, 20); 
 	
 }

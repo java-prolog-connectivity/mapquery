@@ -1,18 +1,18 @@
 package org.jpc.examples.osm.model.imp;
 
 import static java.util.Arrays.asList;
-import static org.jpc.util.concurrent.ThreadLocalPrologEngine.getPrologEngine;
+import static org.jpc.examples.osm.model.jpcconverters.OsmContext.getOsmContext;
+import static org.jpc.engine.provider.PrologEngineProviderManager.getPrologEngine;
 
 import java.util.List;
 import java.util.Map;
 
-import org.jpc.converter.toterm.tolistterm.IterableToTermConverter;
-import org.jpc.converter.toterm.tolistterm.MapToTermConverter;
+import org.jpc.converter.catalog.listterm.IterableConverter;
+import org.jpc.converter.catalog.listterm.MapConverter;
 import org.jpc.engine.logtalk.LogtalkObject;
 import org.jpc.examples.osm.model.Coordinate;
 import org.jpc.examples.osm.model.Node;
 import org.jpc.examples.osm.model.Way;
-import org.jpc.examples.osm.model.jpcconverters.TermToNodeConverter;
 import org.jpc.query.Query;
 import org.jpc.term.Compound;
 import org.jpc.term.IntegerTerm;
@@ -20,14 +20,12 @@ import org.jpc.term.Term;
 import org.jpc.term.Variable;
 
 public class WayJpc implements Way {
-
-	public static final String WAY_FUNCTOR = "way"; //way prolog functor
 	
 	private Long id;
-	private List<String> nodesIds;
+	private List<Long> nodesIds;
 	private Map<String,String> tags;
 	
-	public WayJpc(Long id, List<String> nodesIds, Map<String,String> tags) {
+	public WayJpc(Long id, List<Long> nodesIds, Map<String,String> tags) {
 		this.id = id;
 		this.nodesIds = nodesIds;
 		this.tags = tags;
@@ -39,7 +37,7 @@ public class WayJpc implements Way {
 	}
 
 	@Override
-	public List<String> getNodesIds() {
+	public List<Long> getNodesIds() {
 		return nodesIds;
 	}
 
@@ -50,8 +48,8 @@ public class WayJpc implements Way {
 	public List<Node> nodes() {
 		String nodeVarName = "Node";
 		Term message = new Compound("node", asList(new Variable(nodeVarName)));
-		Query query = new LogtalkObject(this, getPrologEngine()).perform(message);
-		return query.select(nodeVarName).adapt(new TermToNodeConverter()).allSolutions();
+		Query query = new LogtalkObject(this, getPrologEngine(), getOsmContext()).perform(message);
+		return query.<Node>selectObject(nodeVarName).allSolutions();
 	}
 	
 	@Override
@@ -60,21 +58,16 @@ public class WayJpc implements Way {
 	}
 
 	@Override
-	public Term asTerm() {
-		return new Compound(WAY_FUNCTOR, asList(new IntegerTerm(id), new IterableToTermConverter().apply(nodesIds), new MapToTermConverter().apply(tags)));
-	}
-
-	@Override
 	public long distanceKm(Coordinate other) {
 		String distanceVarName = "Distance";
-		Term message = new Compound("distancekm", asList(other, new Variable(distanceVarName)));
+		Term message = getOsmContext().compound("distancekm", asList(other, new Variable(distanceVarName)));
 		Query query = new LogtalkObject(this, getPrologEngine()).perform(message);
-		return ((IntegerTerm)query.oneSolution().get(distanceVarName)).longValue();
+		return query.<Long>selectObject(distanceVarName).oneSolutionOrThrow();
 	}
 
 	@Override
 	public boolean near(Coordinate other, long deltaKm) {
-		Term message = new Compound("near", asList(other, new IntegerTerm(deltaKm)));
+		Term message = getOsmContext().compound("near", asList(other, deltaKm));
 		Query query = new LogtalkObject(this, getPrologEngine()).perform(message);
 		return query.hasSolution();
 	}

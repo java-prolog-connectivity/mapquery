@@ -1,8 +1,7 @@
 package org.jpc.examples.osm.model;
 
-import org.jpc.term.TermConvertable;
 
-public interface Coordinate extends TermConvertable {
+public interface Coordinate {
 
 	public double getLon();
 	

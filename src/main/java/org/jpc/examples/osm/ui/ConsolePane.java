@@ -1,11 +1,15 @@
 package org.jpc.examples.osm.ui;
 
+import static org.jpc.examples.osm.model.jpcconverters.OsmContext.getOsmContext;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Future;
+import java.util.Map.Entry;
+import java.util.concurrent.Executor;
 
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker.State;
@@ -24,7 +28,11 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import netscape.javascript.JSObject;
 
-import org.jpc.engine.prolog.PrologEngineConfiguration;
+import org.jpc.commons.prologbrowser.ui.QueryBrowserPane;
+import org.jpc.engine.profile.PrologEngineProfile;
+import org.jpc.engine.profile.PrologEngineProfileFactory;
+import org.jpc.engine.prolog.PrologEngine;
+import org.jpc.engine.prolog.driver.PrologEngineFactory;
 import org.jpc.examples.osm.MapQuery;
 import org.jpc.examples.osm.OsmDataLoader;
 import org.jpc.examples.osm.model.Coordinate;
@@ -36,40 +44,47 @@ import org.jpc.examples.osm.model.gsonconverters.NodeGsonConverter;
 import org.jpc.examples.osm.model.gsonconverters.OsmGsonConverter;
 import org.jpc.examples.osm.model.gsonconverters.WayGsonConverter;
 import org.jpc.examples.osm.model.imp.OsmFragment;
-import org.jpc.examples.osm.model.jpcconverters.TermToNodeConverter;
-import org.jpc.examples.osm.model.jpcconverters.TermToWayConverter;
-import org.jpc.query.Query;
+import org.jpc.query.QueryListener;
+import org.jpc.query.QuerySolution;
+import org.jpc.term.ListTerm;
 import org.jpc.term.Term;
-import org.jpc.util.LogicResourceLoader;
-import org.jpc.util.concurrent.JpcCallable;
-import org.jpc.util.concurrent.JpcExecutor;
-import org.jpc.util.concurrent.JpcRunnable;
-import org.jpc.util.concurrent.OneThreadJpcExecutor;
-import org.jpc.util.concurrent.ThreadLocalPrologEngine;
-import org.jpc.util.ui.PrologConfigurationChooserPane;
-import org.jpc.util.ui.QueryPane;
+import org.jpc.util.PrologResourceLoader;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Lists;
 import com.google.gson.GsonBuilder;
 
-public class ConsolePane extends VBox {
+public class ConsolePane extends VBox implements QueryListener {
 	
 	public static final String JAVA_SCRIPT_INTERFACE_VARIABLE = "java"; //the name of the javascript variable that will be created in the browser to refer to methods in this class
 	public static final String NODE_VARIABLE_NAME = "Node";
 	public static final String WAY_VARIABLE_NAME = "Way";
 	
-	private JpcExecutor jpcExecutor;
+	private Executor mqExecutor;
+	private QueryBrowserPane queryBrowser;
 	private final Button loadOsmFileButton;
 	private final ProgressIndicator loadOsmFileProgress;
-	private final Button startEngineButton;
-	private final ProgressIndicator startEngineProgress;
-	private final PrologConfigurationChooserPane configurationChooserPane;
-	private final QueryPane queryPane;
 	private final WebEngine webEngine;
 	
-	public ConsolePane(final WebEngine webEngine) {
+	public ConsolePane(final WebEngine webEngine, QueryBrowserPane queryBrowser) {
 		this.webEngine = webEngine;
+		this.queryBrowser = queryBrowser;
+		this.mqExecutor = queryBrowser.getExecutor();
+		
+		queryBrowser.queryListenersProperty().add(this);
+		
+		queryBrowser.getSettingsPane().getModel().addProfileFactory(new PrologEngineProfileFactory<PrologEngine>() {
+			@Override
+			public PrologEngineProfile createPrologEngineProfile(PrologEngineFactory prologEngineFactory) {
+				return new PrologEngineProfile(prologEngineFactory) {
+						@Override
+						public void onCreate(PrologEngine prologEngine) {
+							new PrologResourceLoader(prologEngine).logtalkLoad(MapQuery.LOADER_FILE);
+						}
+				};
+			}
+		});
+		
 		webEngine.getLoadWorker().stateProperty().addListener(new ChangeListener<State>() {
 			@Override
 			public void changed(ObservableValue<? extends State> ov, State oldState, State newState) {
@@ -80,41 +95,7 @@ public class ConsolePane extends VBox {
 			}
 		});
 
-		//setAlignment(Pos.CENTER);
-		//setHgap(10);
-		//setVgap(10);
 		setPadding(new Insets(5, 20, 5, 20));
-		
-		Text logicConsoleTitle = new Text("Prolog Console settings");
-		logicConsoleTitle.setFont(DefaultStyle.TITLE_FONT);
-		getChildren().add(createTitleHBox(logicConsoleTitle));
-		
-		HBox configElements = createHBox();
-		configurationChooserPane = new PrologConfigurationChooserPane();
-		configElements.getChildren().add(configurationChooserPane);
-
-		
-		
-		startEngineButton = new Button("Start");
-		startEngineProgress = new ProgressIndicator();
-		startEngineProgress.setVisible(false);
-
-		startEngineButton.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent event) {
-				initializeEngine();
-			}
-		});
-
-		configElements.getChildren().addAll(startEngineButton, startEngineProgress);
-		
-//		configElements.getChildren().add(startEngineButton);
-//		configElements.getChildren().add(startEngineProgress);
-		
-		getChildren().add(configElements);
-		
-
-		
 		
 		final TextField fileTextField = new TextField();
 		Button browseFileButton = new Button("...");
@@ -145,17 +126,17 @@ public class ConsolePane extends VBox {
 	            	System.out.println(file.canRead());
 	            	fc.setInitialDirectory(file);
 	            }
-
 				File selectedFile = fc.showOpenDialog(ConsolePane.this.getScene().getWindow());
 				if(selectedFile != null) {
 					file = selectedFile; //so next time the dialog will open in the same directory
 					fileTextField.setText(selectedFile.getAbsolutePath());
 				}
 			}
-			
 		});
 
 		loadOsmFileButton = new Button("Import");
+		loadOsmFileButton.disableProperty().bind(Bindings.not(queryBrowser.getLogicConsolePane().getPrologEngineChoiceModel().selectedEngineAvailableProperty()));
+		
 		loadOsmFileProgress = new ProgressIndicator();
 		loadOsmFileProgress.setVisible(false);
 		
@@ -166,85 +147,49 @@ public class ConsolePane extends VBox {
 				if(osmFile.isEmpty())
 					SimpleDialog.error("Please select a file with OSM data to load").showDialog();
 				else {
-					if(jpcExecutor == null) {
-						if(configurationChooserPane.verifyPrologEngineSelection()) {
-							initializeEngine();
-						} else {
-							SimpleDialog.error("Please select a logic engine and a bridge library.").showDialog();
-						}
-
-//						boolean resultInitialization;
-//						try {
-//							resultInitialization = initializeEngine().get(); //initializes the jpc executor and an associated logic engine
-//						} catch (InterruptedException | ExecutionException e) {
-//							throw new RuntimeException(e);
-//						} 
-//						if(!resultInitialization) {
-//							SimpleDialog.error("Impossible to initialize correctly Prolog engine").showDialog();
-//							if(jpcExecutor != null) {
-//								jpcExecutor.shutdownNow();
-//								jpcExecutor = null;
-//							}
-//						}
-					}
-					
-					if(jpcExecutor != null) {
-						loadOsmFileProgress.setVisible(true);
-						//loadOsmFileProgress.setProgress(0);
-						
-						jpcExecutor.execute(new JpcRunnable() {
-							@Override
-							public void run() {
-								try {
-									new OsmDataLoader(getPrologEngine()).load(osmFile);
-									Platform.runLater(new Runnable() {
-										@Override
-										public void run() {
-											loadOsmFileProgress.setProgress(1);
-										}
-									});
-								} catch(RuntimeException e) {
-									Platform.runLater(new Runnable() {
-										@Override
-										public void run() {
-											loadOsmFileProgress.setVisible(false);
-										}
-									});
-									throw e; 
-								}
+					loadOsmFileProgress.setVisible(true);
+					//loadOsmFileProgress.setProgress(0);
+					loadOsmFileProgress.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
+					mqExecutor.execute(new Runnable() {
+						@Override
+						public void run() {
+							try {
+								new OsmDataLoader(getCurrentPrologEngine()).load(osmFile);
+								Platform.runLater(new Runnable() {
+									@Override
+									public void run() {
+										loadOsmFileProgress.setProgress(1);
+									}
+								});
+							} catch(RuntimeException e) {
+								Platform.runLater(new Runnable() {
+									@Override
+									public void run() {
+										loadOsmFileProgress.setVisible(false);
+									}
+								});
+								throw e; 
 							}
-						});
-					}
+						}
+					});
 				}
 			}
 		});
 		
 		HBox osmFileOptions = createHBox();
-		osmFileOptions.getChildren().add(new Label("OSM file:"));
-		
 		HBox fileChooser = new HBox();
 		fileChooser.getChildren().add(fileTextField);
 		fileChooser.getChildren().add(browseFileButton);
-		osmFileOptions.getChildren().add(fileChooser);
-		osmFileOptions.getChildren().add(loadOsmFileButton);
-		osmFileOptions.getChildren().add(loadOsmFileProgress);
-		getChildren().add(osmFileOptions);
-
+		osmFileOptions.getChildren().addAll(new Label("OSM file:"), fileChooser, loadOsmFileButton, loadOsmFileProgress);
+		queryBrowser.getLogicConsolePane().getChildren().add(osmFileOptions);
 		
-		
-		queryPane = new QueryPane();
-		getChildren().add(createHBox(queryPane));
-		
-		
-		queryPane.allSolutionsButton.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent event) {
-				String queryText = queryPane.queryText.getText();
-				query(queryText);
-			}
-		});
+		getChildren().add(queryBrowser);
 	}
 	
+	private PrologEngine getCurrentPrologEngine() {
+		return queryBrowser.getLogicConsolePane().getPrologEngineChoiceModel().getPrologEngine();
+	}
+
 	public HBox createTitleHBox(Text title) {
 		HBox hBox = new HBox();
 		hBox.setPadding(new Insets(10,0,10,0));
@@ -259,98 +204,28 @@ public class ConsolePane extends VBox {
 		hBox.getChildren().addAll(children);
 		return hBox; 
 	}
-	
-	public JpcExecutor getJpcExecutor() {
-		return jpcExecutor;
-	}
-	
-	private Future<Boolean> initializeEngine() {
-		PrologEngineConfiguration config = configurationChooserPane.getSelectedConfiguration();
-		jpcExecutor = new OneThreadJpcExecutor(config);
-		//jpcExecutor = new JpcExecutor(new DirectExecutorService(), config);
-		startEngineProgress.setVisible(true);
 
-		return jpcExecutor.submit(new JpcCallable<Boolean>() {
-			@Override
-			public Boolean call() {
-				try {
-					ThreadLocalPrologEngine.setPrologEngine(getPrologEngine());
-					boolean resourcesLoaded = new LogicResourceLoader(getPrologEngine()).logtalkLoad(MapQuery.LOADER_FILE);
-					Platform.runLater(new Runnable() {
-						@Override
-						public void run() {
-							startEngineProgress.setProgress(1);
-							disableEngineConfigurationOptions();
-							enableQueryOptions();
-						}
-					});
-					return resourcesLoaded;
-				} catch(RuntimeException e) {
-					Platform.runLater(new Runnable() {
-						@Override
-						public void run() {
-							startEngineProgress.setVisible(false);
-						}
-					});
-					throw e; 
-				}
-			}
-		});
-	}
-	
-
-	
-	public void disableEngineConfigurationOptions() {
-		startEngineButton.setDisable(true);
-		configurationChooserPane.disableEngineConfigurationOptions();
-	}
-	
-	public void disableQueryOptions() {
-		queryPane.disable();
-	}
-
-	public void enableQueryOptions() {
-		queryPane.enable();
-	}
-	
 	private class BrowserInterface {
-		public void query(String queryString) {
-			ConsolePane.this.query(queryString);
-		}
-	}
-	
-	public void query(final String queryString) {
-		try {
-			jpcExecutor.submit(new JpcCallable<ListMultimap<String, Term>>() {
-				@Override
-				public ListMultimap<String, Term> call() throws Exception {
-					Query query = getPrologEngine().query(queryString);
-					ListMultimap<String, Term> mapQueryResult = query.allSolutionsMultimap();
-					drawQuery(mapQueryResult);
-					return mapQueryResult;
-				}
-			});
-		} catch (RuntimeException e) {
-			throw e;
-		}
-		
+//		public void query(String queryString) {
+//			ConsolePane.this.query(queryString);
+//		}
 	}
 
-	private void drawQuery(ListMultimap<String, Term> mapQueryResult) {
+	private void drawQuerySolution(ListMultimap<String, Term> mapQueryResult) {
 		List<Term> nodeTerms = mapQueryResult.get(NODE_VARIABLE_NAME);
 		if(nodeTerms == null)
 			nodeTerms = new ArrayList<>();
 			List<Term> wayTerms = mapQueryResult.get(WAY_VARIABLE_NAME);
 		if(wayTerms == null)
 			wayTerms = new ArrayList<>();
-		
-		List<Node> nodes = Lists.transform(nodeTerms, new TermToNodeConverter());
-		List<Way> ways = Lists.transform(wayTerms, new TermToWayConverter());
+			
+		List<Node> nodes = getOsmContext().fromTerm(new ListTerm(nodeTerms).asTerm());
+		List<Way> ways = getOsmContext().fromTerm(new ListTerm(wayTerms).asTerm());
 
-		int numberNodes = nodes.size();
-		int numberWays = ways.size();
-		System.out.println("Number of nodes: " + numberNodes);
-		System.out.println("Number of ways: " + numberWays);
+//		int numberNodes = nodes.size();
+//		int numberWays = ways.size();
+//		System.out.println("Number of nodes: " + numberNodes);
+//		System.out.println("Number of ways: " + numberWays);
 		
 		
 		Osm osm = new OsmFragment(nodes, ways);
@@ -379,9 +254,62 @@ public class ConsolePane extends VBox {
 		
 	}
 
-	public void freeResources() {
-		if(jpcExecutor != null)
-			jpcExecutor.shutdownNow();
+	private void addSolution(ListMultimap<String, Term> solutionsMultimap, List<QuerySolution> solutions) {
+		for(QuerySolution solution : solutions) {
+			addSolution(solutionsMultimap, solution);
+		}
+	}
+	
+	private void addSolution(ListMultimap<String, Term> solutionsMultimap, QuerySolution solution) {
+		for(Entry<String, Term> entry : solution.entrySet()) {
+			solutionsMultimap.put(entry.getKey(), entry.getValue());
+		}
+	}
+	
+	public void stop() {
+		queryBrowser.stop();
+	}
+
+	@Override
+	public void onQueryReady() {
+	}
+
+	@Override
+	public void onQueryOpened() {
+	}
+
+	@Override
+	public void onQueryExhausted() {
+	}
+
+	@Override
+	public void onQueryInProgress() {
+	}
+
+	@Override
+	public void onQueryFinished() {
+	}
+
+	@Override
+	public void onException(Exception e) {
+	}
+
+	@Override
+	public void onNextSolutionFound(QuerySolution solution) {
+		ListMultimap<String, Term> solutionsMultimap = ArrayListMultimap.create();
+		addSolution(solutionsMultimap, solution);
+		drawQuerySolution(solutionsMultimap);
+	}
+
+	@Override
+	public void onSolutionsFound(List<QuerySolution> solutions) {
+		ListMultimap<String, Term> solutionsMultimap = ArrayListMultimap.create();
+		addSolution(solutionsMultimap, solutions);
+		drawQuerySolution(solutionsMultimap);
+	}
+
+	@Override
+	public void onQueryDisposed() {
 	}
 
 }
