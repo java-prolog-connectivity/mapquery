@@ -41,7 +41,7 @@ public class OsmBrowser extends Region {
     }
  
     @Override protected double computePrefWidth(double height) {
-        return 1000;
+        return 525;
     }
  
     @Override protected double computePrefHeight(double width) {
@@ -52,5 +52,5 @@ public class OsmBrowser extends Region {
     	return webEngine;
     }
     
-    
+  
 }
