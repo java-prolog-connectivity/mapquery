@@ -21,7 +21,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
 import javafx.scene.web.WebEngine;
 import javafx.stage.FileChooser;
@@ -54,7 +54,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.gson.GsonBuilder;
 
-public class ConsolePane extends VBox implements QueryListener {
+public class MapQueryPane extends Region implements QueryListener {
 	
 	public static final String JAVA_SCRIPT_INTERFACE_VARIABLE = "java"; //the name of the javascript variable that will be created in the browser to refer to methods in this class
 	public static final String NODE_VARIABLE_NAME = "Node";
@@ -66,7 +66,7 @@ public class ConsolePane extends VBox implements QueryListener {
 	private final ProgressIndicator loadOsmFileProgress;
 	private final WebEngine webEngine;
 	
-	public ConsolePane(final WebEngine webEngine, QueryBrowserPane queryBrowser) {
+	public MapQueryPane(final WebEngine webEngine, final QueryBrowserPane queryBrowser) {
 		this.webEngine = webEngine;
 		this.queryBrowser = queryBrowser;
 		this.mqExecutor = queryBrowser.getExecutor();
@@ -126,7 +126,7 @@ public class ConsolePane extends VBox implements QueryListener {
 	            	System.out.println(file.canRead());
 	            	fc.setInitialDirectory(file);
 	            }
-				File selectedFile = fc.showOpenDialog(ConsolePane.this.getScene().getWindow());
+				File selectedFile = fc.showOpenDialog(MapQueryPane.this.getScene().getWindow());
 				if(selectedFile != null) {
 					file = selectedFile; //so next time the dialog will open in the same directory
 					fileTextField.setText(selectedFile.getAbsolutePath());
@@ -154,7 +154,7 @@ public class ConsolePane extends VBox implements QueryListener {
 						@Override
 						public void run() {
 							try {
-								new OsmDataLoader(getCurrentPrologEngine()).load(osmFile);
+								new OsmDataLoader(queryBrowser.getCurrentPrologEngine()).load(osmFile);
 								Platform.runLater(new Runnable() {
 									@Override
 									public void run() {
@@ -186,9 +186,7 @@ public class ConsolePane extends VBox implements QueryListener {
 		getChildren().add(queryBrowser);
 	}
 	
-	private PrologEngine getCurrentPrologEngine() {
-		return queryBrowser.getLogicConsolePane().getPrologEngineChoiceModel().getPrologEngine();
-	}
+
 
 	public HBox createTitleHBox(Text title) {
 		HBox hBox = new HBox();
@@ -211,7 +209,7 @@ public class ConsolePane extends VBox implements QueryListener {
 //		}
 	}
 
-	private void drawQuerySolution(ListMultimap<String, Term> mapQueryResult) {
+	private void drawSolution(ListMultimap<String, Term> mapQueryResult) {
 		List<Term> nodeTerms = mapQueryResult.get(NODE_VARIABLE_NAME);
 		if(nodeTerms == null)
 			nodeTerms = new ArrayList<>();
@@ -239,9 +237,7 @@ public class ConsolePane extends VBox implements QueryListener {
 		//gson.setPrettyPrinting();
 		
 		final String osmJson = gson.create().toJson(osm);
-		
 		Platform.runLater(new Runnable() {
-
 			@Override
 			public void run() {
 				System.out.println(osmJson);
@@ -249,9 +245,7 @@ public class ConsolePane extends VBox implements QueryListener {
 				webEngine.executeScript("g_drawGeoJson("+osmJson+")");
 				System.out.println("done drawing! ...");
 			}
-			
 		});
-		
 	}
 
 	private void addSolution(ListMultimap<String, Term> solutionsMultimap, List<QuerySolution> solutions) {
@@ -298,14 +292,14 @@ public class ConsolePane extends VBox implements QueryListener {
 	public void onNextSolutionFound(QuerySolution solution) {
 		ListMultimap<String, Term> solutionsMultimap = ArrayListMultimap.create();
 		addSolution(solutionsMultimap, solution);
-		drawQuerySolution(solutionsMultimap);
+		drawSolution(solutionsMultimap);
 	}
 
 	@Override
 	public void onSolutionsFound(List<QuerySolution> solutions) {
 		ListMultimap<String, Term> solutionsMultimap = ArrayListMultimap.create();
 		addSolution(solutionsMultimap, solutions);
-		drawQuerySolution(solutionsMultimap);
+		drawSolution(solutionsMultimap);
 	}
 
 	@Override

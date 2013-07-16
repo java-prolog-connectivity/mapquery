@@ -11,23 +11,24 @@ import org.jpc.engine.provider.PrologEngineProviderManager;
 
 public class Main extends Application {
     private Scene scene;
-    private ConsolePane logicConsole;
+    private MapQueryPane mapQueryPane;
     private OsmBrowser browser;
     
     @Override public void start(Stage stage) {
         // create the scene
         stage.setTitle("MapQuery");
-        BorderPane borderPane = new BorderPane();
+        
         //VBox vbox = new VBox();
         //vbox.setPadding(new Insets(10));
         //vbox.setSpacing(8);
         browser = new OsmBrowser();
-        QueryBrowserPane queryBrowserPane = new QueryBrowserPane(this, null);
-        PrologEngineProviderManager.setPrologEngineProvider(queryBrowserPane.getLogicConsolePane().getPrologEngineChoiceModel());
-        queryBrowserPane.getSettingsPane().getModel().preloadLogtalkProperty().set(true);
-        queryBrowserPane.showSettings(false);
-        logicConsole = new ConsolePane(browser.getEngine(), queryBrowserPane);
-        borderPane.setLeft(logicConsole);
+        QueryBrowserPane hydraPane = new QueryBrowserPane(this, null);
+        PrologEngineProviderManager.setPrologEngineProvider(hydraPane.getLogicConsolePane().getPrologEngineChoiceModel());
+        hydraPane.getSettingsPane().getModel().preloadLogtalkProperty().set(true);
+        //queryBrowserPane.showSettings(false);
+        mapQueryPane = new MapQueryPane(browser.getEngine(), hydraPane);
+        BorderPane borderPane = new BorderPane();
+        borderPane.setLeft(mapQueryPane);
         borderPane.setRight(browser);
 //        borderPane.setTop(logicConsole);
 //        borderPane.setBottom(browser);
@@ -38,7 +39,7 @@ public class Main extends Application {
  
     @Override public void stop() {
     	//a call to super is not needed since according to the documentation: "The implementation of this method provided by the Application class does nothing."
-    	logicConsole.stop();
+    	mapQueryPane.stop();
     }
     
     public static void main(String[] args){

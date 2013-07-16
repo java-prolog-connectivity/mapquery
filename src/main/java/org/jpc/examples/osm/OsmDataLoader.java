@@ -16,7 +16,7 @@ import org.jpc.engine.prolog.PrologEngine;
 import org.jpc.examples.osm.model.jpcconverters.CoordinateJpcConverter;
 import org.jpc.examples.osm.model.jpcconverters.NodeJpcConverter;
 import org.jpc.examples.osm.model.jpcconverters.WayJpcConverter;
-import org.jpc.salt.PrologEngineWriter;
+import org.jpc.salt.CachedPrologEngineWriter;
 import org.jpc.salt.PrologWriter;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -60,8 +60,8 @@ public class OsmDataLoader {
 //		try(PrintStream ps = new PrintStream("brussels_center_filtered.lgt")) {
 //			writer = new PrologStreamWriter(prologEngine, ps);
 		try {
-			writer = new PrologEngineWriter(prologEngine);
-			
+			//writer = new PrologEngineWriter(prologEngine);
+			writer = new CachedPrologEngineWriter(prologEngine);
 			writer.followingDynamicClauses();
 			writer.startLogtalkObjectContext().startAtom("osm");
 			
@@ -70,9 +70,10 @@ public class OsmDataLoader {
 			DefaultHandler saxHandler = new OsmSaxHandler();
 
 			saxParser.parse(resourceFile, saxHandler);
-			for(String s:names) {
-				System.out.println(s);
-			}
+//			for(String s:names) {
+//				System.out.println(s);
+//			}
+			((CachedPrologEngineWriter)writer).close();
 		} catch (IOException | ParserConfigurationException | SAXException e) {
 			throw new RuntimeException(e);
 		}
