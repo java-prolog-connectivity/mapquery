@@ -2,18 +2,18 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	
-	<parent>
-      <groupId>org.sonatype.oss</groupId>
-      <artifactId>oss-parent</artifactId>
-      <version>7</version>
-    </parent>
-	
-	<groupId>com.github.java-prolog-connectivity</groupId>
+    <parent>
+		<groupId>com.github.java-prolog-connectivity</groupId>
+		<artifactId>jpc-parent</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+
 	<artifactId>mapquery</artifactId>
 	<version>0.0.1-alpha-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	
 	<name>MapQuery</name>
 	<description>A RIA application for querying geographical maps using logic programming</description>
+	<packaging>jar</packaging>
 	<url>https://github.com/sergio-castro/mapquery</url>
 	
 	<licenses>
@@ -34,78 +34,13 @@
         <name>Sergio Castro</name>
       </developer>
     </developers>
-    
-    
-    <repositories>
-		
-		<repository>
-         <id>snapshots-repo</id>
-         <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-         <releases><enabled>false</enabled></releases>
-         <snapshots><enabled>true</enabled></snapshots>
-       </repository>
-<!-- 	
-        <repository>
-            <id>osgeo</id>
-            <name>Open Source Geospatial Foundation Repository</name>
-            <url>http://download.osgeo.org/webdav/geotools/</url>
-        </repository>
--->
-	</repositories>
-	
-        
-	<prerequisites>
-		<maven>2.2.1</maven>
-	</prerequisites>
-
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<geotools.version>9.0-M0</geotools.version>
-	</properties>
-
-
 
 	<dependencies>
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.11</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>[1.7.2,]</version>
-		</dependency>
-
- 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>[1.7.2,]</version>
-	 		<optional>true</optional>
-		</dependency> 
-
  		 <dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 			<version>2.2.2</version>
 		</dependency> 	
-		
-		<!--
- 		 <dependency>
-  			<groupId>org.geotools</groupId>
-  			<artifactId>gt-main</artifactId>
-  			<version>${geotools.version}</version>
-		</dependency>
-
-  		<dependency>
-  			<groupId>org.geotools</groupId>
-  			<artifactId>gt-geojson</artifactId>
-  			<version>${geotools.version}</version>
-		</dependency> 
-		-->
 
  		 <dependency>
 			<groupId>com.github.java-prolog-connectivity</groupId>
@@ -118,130 +53,21 @@
 			<artifactId>jpc-drivers</artifactId>
 			<version>0.0.1-alpha-SNAPSHOT</version>
 		</dependency>	
-
-	
 	</dependencies>
-
-
-
-
+	
 	<build>
 		<plugins>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.15</version>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<includes>
+						<include>org/jpc/examples/osm/OsmTestSuite.java</include>
+					</includes>
 				</configuration>
 			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>2.2.1</version>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.9</version>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-						<!-- 
-						<configuration>
-              				<additionalparam>-Xdoclint:none</additionalparam>
-            			</configuration>
-            			 -->
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<version>2.7</version>
-
-				<configuration>
-					<includeScope>runtime</includeScope>
-					<outputDirectory>${project.build.directory}/lib</outputDirectory>
-				</configuration>
-
-				<executions>
-					<execution>
-						<id>copy-dependencies</id>
-						<phase>process-resources</phase>
-						<!-- <phase>package</phase> -->
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
-
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.4</version>
-				<executions>
-					<execution>
-						<id>jar-test-classes</id>
-						<goals>
-							<goal>test-jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
 		</plugins>
-
-
-
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.apache.maven.plugins</groupId>
-										<artifactId>maven-dependency-plugin</artifactId>
-										<versionRange>[1.0.0,)</versionRange>
-										<goals>
-											<goal>copy-dependencies</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-
-
 	</build>
 
 </project>
