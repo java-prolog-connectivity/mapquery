@@ -30,7 +30,7 @@ public class WayJpcConverter extends JpcConverter<Way, Compound> {
 
 	@Override
 	public Compound toTerm(Way way, Jpc context) {
-		return context.compound(WAY_FUNCTOR, asList(way.getId(), way.getNodesIds(), way.getTags()));
+		return context.toTerm(WAY_FUNCTOR, asList(way.getId(), way.getNodesIds(), way.getTags()));
 	}
 
 }

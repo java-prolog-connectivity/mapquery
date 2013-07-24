@@ -43,14 +43,14 @@ public class NodeJpc implements Node {
 	@Override
 	public long distanceKm(Coordinate other) {
 		String distanceVarName = "Distance";
-		Term message = getOsmContext().compound("distancekm", asList(other, new Variable(distanceVarName)));
+		Term message = getOsmContext().toTerm("distancekm", asList(other, new Variable(distanceVarName)));
 		Query query = new LogtalkObject(this, getPrologEngine()).perform(message);
 		return query.<Long>selectObject(distanceVarName).oneSolutionOrThrow();
 	}
 
 	@Override
 	public boolean near(Coordinate other, long deltaKm) {
-		Term message = getOsmContext().compound("near", asList(other, deltaKm));
+		Term message = getOsmContext().toTerm("near", asList(other, deltaKm));
 		Query query = new LogtalkObject(this, getPrologEngine()).perform(message);
 		return query.hasSolution();
 	}

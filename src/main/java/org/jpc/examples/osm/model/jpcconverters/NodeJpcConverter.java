@@ -30,7 +30,7 @@ public class NodeJpcConverter extends JpcConverter<Node, Compound> {
 
 	@Override
 	public Compound toTerm(Node node, Jpc context) {
-		return context.compound(NODE_FUNCTOR, asList(node.getId(), node.getCoordinate(), node.getTags()));
+		return context.toTerm(NODE_FUNCTOR, asList(node.getId(), node.getCoordinate(), node.getTags()));
 	}
 	
 }
