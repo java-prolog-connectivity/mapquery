@@ -45,7 +45,7 @@ import org.jpc.examples.osm.model.gsonconverters.OsmGsonConverter;
 import org.jpc.examples.osm.model.gsonconverters.WayGsonConverter;
 import org.jpc.examples.osm.model.imp.OsmFragment;
 import org.jpc.query.QueryListener;
-import org.jpc.query.QuerySolution;
+import org.jpc.query.Solution;
 import org.jpc.term.ListTerm;
 import org.jpc.term.Term;
 import org.jpc.util.PrologResourceLoader;
@@ -248,13 +248,13 @@ public class MapQueryPane extends Region implements QueryListener {
 		});
 	}
 
-	private void addSolution(ListMultimap<String, Term> solutionsMultimap, List<QuerySolution> solutions) {
-		for(QuerySolution solution : solutions) {
+	private void addSolution(ListMultimap<String, Term> solutionsMultimap, List<Solution> solutions) {
+		for(Solution solution : solutions) {
 			addSolution(solutionsMultimap, solution);
 		}
 	}
 	
-	private void addSolution(ListMultimap<String, Term> solutionsMultimap, QuerySolution solution) {
+	private void addSolution(ListMultimap<String, Term> solutionsMultimap, Solution solution) {
 		for(Entry<String, Term> entry : solution.entrySet()) {
 			solutionsMultimap.put(entry.getKey(), entry.getValue());
 		}
@@ -289,14 +289,14 @@ public class MapQueryPane extends Region implements QueryListener {
 	}
 
 	@Override
-	public void onNextSolutionFound(QuerySolution solution) {
+	public void onNextSolutionFound(Solution solution) {
 		ListMultimap<String, Term> solutionsMultimap = ArrayListMultimap.create();
 		addSolution(solutionsMultimap, solution);
 		drawSolution(solutionsMultimap);
 	}
 
 	@Override
-	public void onSolutionsFound(List<QuerySolution> solutions) {
+	public void onSolutionsFound(List<Solution> solutions) {
 		ListMultimap<String, Term> solutionsMultimap = ArrayListMultimap.create();
 		addSolution(solutionsMultimap, solutions);
 		drawSolution(solutionsMultimap);
