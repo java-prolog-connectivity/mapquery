@@ -14,7 +14,7 @@
 	<name>MapQuery</name>
 	<description>A RIA application for querying geographical maps using logic programming</description>
 	<packaging>jar</packaging>
-	<url>https://github.com/sergio-castro/mapquery</url>
+	<url>https://github.com/java-prolog-connectivity/mapquery</url>
 	
 	<licenses>
 	    <license>
@@ -24,9 +24,9 @@
     </licenses>
   
     <scm>
-      <connection>scm:git:git@github.com:sergio-castro/mapquery.git</connection>
-      <developerConnection>scm:git:git@github.com:sergio-castro/mapquery.git</developerConnection>
-      <url>git@github.com:sergio-castro/mapquery.git</url>
+      <connection>scm:git:git@github.com:java-prolog-connectivity/mapquery.git</connection>
+      <developerConnection>scm:git:git@github.com:java-prolog-connectivity/mapquery.git</developerConnection>
+      <url>git@github.com:java-prolog-connectivity/mapquery.git</url>
     </scm>
     
     <developers>
