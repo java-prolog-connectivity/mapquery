@@ -56,7 +56,7 @@ import com.google.gson.GsonBuilder;
 
 public class MapQueryPane extends Region implements QueryListener {
 	
-	public static final String JAVA_SCRIPT_INTERFACE_VARIABLE = "java"; //the name of the javascript variable that will be created in the browser to refer to methods in this class
+	public static final String JAVA_SCRIPT_INTERFACE_VARIABLE = "java"; //the id of the javascript variable that will be created in the browser to refer to methods in this class
 	public static final String NODE_VARIABLE_NAME = "Node";
 	public static final String WAY_VARIABLE_NAME = "Way";
 	

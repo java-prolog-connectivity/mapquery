@@ -10,10 +10,10 @@ public class OsmContext {
 	public static Jpc getOsmContext() {
 		if(context == null) {
 			context = JpcBuilder.create()
-					.registerConverter(new OsmJpcConverter())
-					.registerConverter(new CoordinateJpcConverter())
-					.registerConverter(new NodeJpcConverter())
-					.registerConverter(new WayJpcConverter())
+					.register(new OsmJpcConverter())
+					.register(new CoordinateJpcConverter())
+					.register(new NodeJpcConverter())
+					.register(new WayJpcConverter())
 					.build();
 		}
 		return context;

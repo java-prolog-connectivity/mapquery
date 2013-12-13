@@ -11,7 +11,7 @@ import org.jpc.examples.osm.model.Coordinate;
 import org.jpc.examples.osm.model.Node;
 import org.jpc.query.Query;
 import org.jpc.term.Term;
-import org.jpc.term.Variable;
+import org.jpc.term.Var;
 
 public class NodeJpc implements Node {
 
@@ -43,7 +43,7 @@ public class NodeJpc implements Node {
 	@Override
 	public long distanceKm(Coordinate other) {
 		String distanceVarName = "Distance";
-		Term message = getOsmContext().toTerm("distancekm", asList(other, new Variable(distanceVarName)));
+		Term message = getOsmContext().toTerm("distancekm", asList(other, new Var(distanceVarName)));
 		Query query = new LogtalkObject(this, getPrologEngine()).perform(message);
 		return query.<Long>selectObject(distanceVarName).oneSolutionOrThrow();
 	}
