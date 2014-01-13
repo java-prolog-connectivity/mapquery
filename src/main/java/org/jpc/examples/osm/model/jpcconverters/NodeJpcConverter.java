@@ -31,7 +31,7 @@ public class NodeJpcConverter implements ToTermConverter<Node, Compound>, FromTe
 
 	@Override
 	public Compound toTerm(Node node, Class<Compound> termClass, Jpc context) {
-		return context.toTerm(NODE_FUNCTOR, asList(node.getId(), node.getCoordinate(), node.getTags()));
+		return context.toCompound(NODE_FUNCTOR, asList(node.getId(), node.getCoordinate(), node.getTags()));
 	}
 	
 }

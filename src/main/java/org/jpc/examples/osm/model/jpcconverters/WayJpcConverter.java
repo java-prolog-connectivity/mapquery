@@ -31,7 +31,7 @@ public class WayJpcConverter implements ToTermConverter<Way, Compound>, FromTerm
 
 	@Override
 	public Compound toTerm(Way way, Class<Compound> termClass, Jpc context) {
-		return context.toTerm(WAY_FUNCTOR, asList(way.getId(), way.getNodesIds(), way.getTags()));
+		return context.toCompound(WAY_FUNCTOR, asList(way.getId(), way.getNodesIds(), way.getTags()));
 	}
 
 }
