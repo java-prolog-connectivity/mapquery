@@ -2,7 +2,7 @@ package org.jpc.examples.osm;
 
 import static org.jpc.engine.provider.PrologEngineProviderManager.getPrologEngine;
 
-import org.jpc.util.PrologResourceLoader;
+import org.jpc.util.engine.PrologResourceLoader;
 
 public class MapQuery {
 

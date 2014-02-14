@@ -1,7 +1,7 @@
 package org.jpc.examples.osm;
 
 import static org.jpc.engine.prolog.PrologConstants.CONS_FUNCTOR;
-import static org.jpc.engine.prolog.PrologConstants.EMPTY_LIST_SYMBOL;
+import static org.jpc.engine.prolog.PrologConstants.NIL_SYMBOL;
 
 import java.io.File;
 import java.io.IOException;
@@ -102,7 +102,7 @@ public class OsmDataLoader {
 				writer.startIntegerTerm(Long.parseLong(ref));
 			} else if(qName.equals(TAG_ELEMENT)) {
 				if(nodeReferenceCounter > 0) {
-					writer.startAtom(EMPTY_LIST_SYMBOL);
+					writer.startAtom(NIL_SYMBOL);
 					closeNodeReferences();
 				}
 				tagsCounter++;
@@ -116,17 +116,17 @@ public class OsmDataLoader {
 		@Override
 		public void endElement(String uri, String localName, String qName) throws SAXException {
 			if(qName.equals(NODE_ELEMENT)) {
-				writer.startAtom(EMPTY_LIST_SYMBOL); //an empty list for ending the list of tags expressed as cons
+				writer.startAtom(NIL_SYMBOL); //an empty list for ending the list of tags expressed as cons
 				if(tagsCounter>0)
 					closeTags();
 				writer.endCompound(); //closing the node
 				
 			} else if(qName.equals(WAY_ELEMENT)) {
 				if(nodeReferenceCounter > 0) {
-					writer.startAtom(EMPTY_LIST_SYMBOL);
+					writer.startAtom(NIL_SYMBOL);
 					closeNodeReferences();
 				}
-				writer.startAtom(EMPTY_LIST_SYMBOL); //an empty list for ending the list of tags expressed as cons
+				writer.startAtom(NIL_SYMBOL); //an empty list for ending the list of tags expressed as cons
 				if(tagsCounter>0)
 					closeTags();
 				writer.endCompound(); //closing the way

@@ -48,7 +48,7 @@ import org.jpc.query.QueryListener;
 import org.jpc.query.Solution;
 import org.jpc.term.ListTerm;
 import org.jpc.term.Term;
-import org.jpc.util.PrologResourceLoader;
+import org.jpc.util.engine.PrologResourceLoader;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
