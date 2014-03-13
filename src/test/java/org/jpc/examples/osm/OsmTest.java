@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.jpc.examples.osm.model.imp.OsmServiceJpc;
 import org.junit.Test;
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 public class OsmTest {
 
