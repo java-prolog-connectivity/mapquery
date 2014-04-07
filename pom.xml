@@ -2,7 +2,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	
-    <parent>
+	<parent>
 		<groupId>com.github.java-prolog-connectivity</groupId>
 		<artifactId>jpc-parent</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
@@ -36,6 +36,14 @@
     </developers>
 
 	<dependencies>
+	 	
+	 	<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>[1.7.5,]</version>
+	 		<scope>optional</scope>
+		</dependency> 
+		
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
