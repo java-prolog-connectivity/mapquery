@@ -8,6 +8,7 @@ import javafx.stage.Stage;
 
 import org.jpc.commons.prologbrowser.ui.QueryBrowserPane;
 import org.jpc.engine.provider.PrologEngineProviderManager;
+import org.jpc.util.DriverUtil;
 
 public class Main extends Application {
     private Scene scene;
@@ -42,7 +43,16 @@ public class Main extends Application {
     	mapQueryPane.stop();
     }
     
+    /**
+     * Just to facilitate opening the interface from the Prolog side.
+     */
+    public static void launch(){
+    	//DriverUtil.reportFoundDrivers();
+    	Application.launch();
+    }
+    
     public static void main(String[] args){
         launch(args);
     }
+
 }
