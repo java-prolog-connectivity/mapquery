@@ -49,12 +49,16 @@ import org.jpc.query.Solution;
 import org.jpc.term.ListTerm;
 import org.jpc.term.Term;
 import org.jpc.util.engine.PrologResourceLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.gson.GsonBuilder;
 
 public class MapQueryPane extends Region implements QueryListener {
+	
+	Logger logger = LoggerFactory.getLogger(MapQueryPane.class);
 	
 	public static final String JAVA_SCRIPT_INTERFACE_VARIABLE = "java"; //the id of the javascript variable that will be created in the browser to refer to methods in this class
 	public static final String NODE_VARIABLE_NAME = "Node";
@@ -79,7 +83,7 @@ public class MapQueryPane extends Region implements QueryListener {
 				return new PrologEngineProfile(prologEngineFactory) {
 						@Override
 						public void onCreate(PrologEngine prologEngine) {
-							new PrologResourceLoader(prologEngine).logtalkLoad(MapQuery.LOADER_FILE);
+							new PrologResourceLoader(prologEngine).logtalkLoad(MapQuery.LOADER_FILE); //NOTE: Uncomment this to avoid specifying in the GUI the Logtalk entry file for the map example.
 						}
 				};
 			}
@@ -123,7 +127,7 @@ public class MapQueryPane extends Region implements QueryListener {
 	            	file = new File(currentDir);
 	            	//System.out.println(file.exists());
 	            	//System.out.println(file.isDirectory());
-	            	System.out.println(file.canRead());
+	            	//System.out.println(file.canRead());
 	            	fc.setInitialDirectory(file);
 	            }
 				File selectedFile = fc.showOpenDialog(MapQueryPane.this.getScene().getWindow());
@@ -240,10 +244,10 @@ public class MapQueryPane extends Region implements QueryListener {
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-				System.out.println(osmJson);
-				System.out.println("preparing to draw...");
+				logger.debug("OSM Json: " + osmJson);
+				logger.debug("Preparing to draw...");
 				webEngine.executeScript("g_drawGeoJson("+osmJson+")");
-				System.out.println("done drawing! ...");
+				logger.debug("Done drawing! ...");
 			}
 		});
 	}
