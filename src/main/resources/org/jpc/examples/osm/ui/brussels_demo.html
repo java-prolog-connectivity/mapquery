@@ -1,6 +1,10 @@
+<html>
+<!--
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+-->
+
 <head>
 
 	<style type="text/css">
@@ -61,18 +65,31 @@
 	
 	<meta charset='utf-8' />
 	<title>Logic Maps</title>
-	<script src="http://maps.google.com/maps/api/js?sensor=false"></script>
-	
-	<script src="http://code.jquery.com/jquery-1.5.1.min.js"></script>
-	<script src="http://openlayers.org/api/OpenLayers.js"></script>
 
-	<script type='text/javascript'>
+	<script type="text/javascript" src="http://maps.google.com/maps/api/js?v=3.2&sensor=false"></script>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+	<script type="text/javascript" src="http://openlayers.org/api/OpenLayers.js"></script>
+	
+	
+	
+	<!--
+	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.5.1.min.js"></script>
+	
+	from google site:
+	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+	-->
+	
+
+
+	<script type="text/javascript">
 	
 	//var g_disableQueryOptions;
 	//var g_enableQueryOptions;
 	var g_drawGeoJson;
 	
 	(function ($) {
+	
 		var map;
 		var vectorLayer;
 		var features;
@@ -81,7 +98,6 @@
 		var geoJsonFormat;
 		
 		function initMap() {
-
 			var osm_format;
 			
 			map = new OpenLayers.Map('map_element', {
@@ -204,15 +220,15 @@
 		}
 
 		function addListeners() {
-			$('div[#options] > #go_button').click(function() {
+			$('#go_button').click(function() {
 				goToUserCoordinates();
 			});
 			/*
-			$('div[#options] > #query_button').click(function() {
+			$('#query_button').click(function() {
 				populateVectorLayer();
 			});
 			*/
-			$('div[#options] > #clear_map_button').click(function() {
+			$('#clear_map_button').click(function() {
 				cleanVectorLayer();
 			});
 			
@@ -235,7 +251,9 @@
 		*/
 		
 		$(function() {
+		
 			addListeners();
+			
 			//disableQueryOptions();
 			initMap(); //TODO put at the beginning of the method, but inside an if block testing if there is internet connection
 		});
@@ -251,8 +269,11 @@
 
 <body>
 	<div id="main">
+		<input id="offline_warning" size="60" type="text" style="display:none" readonly="readonly" />
 		<div id="map">
-		    <div id="options">
+		
+		  <div id="options">
+		    <div>
 			<!--
 				<div>
 					<label for="browse_osm_file_button">OSM file</label>
@@ -276,6 +297,7 @@
 				<input id="query_button" class="query-option" type="button" value="Query" />
 			</div>
 			-->
+		  </div>
 		</div>
 		<div id="help">
 			<div class="help-menu"><h1>Help</h1></div>
@@ -302,4 +324,28 @@
 	</div>
 
 </body>
+
+<script type='text/javascript'>
+var elem = document.getElementById('offline_warning');
+
+ if(!window.jQuery){
+	elem.style.display = 'block';
+	elem.value = 'No internet access. This application requires an internet connection.';
+ } else {
+ 	elem.style.display = 'block';
+ 	elem.value = 'Internet :)';
+ }
+ 
+ 
+
+/*
+var a=navigator.onLine;
+ if(a){
+elem.value = 'online';
+ }else{
+  elem.value = 'offline';
+ }
+ */
+</script>
+
 </html>
