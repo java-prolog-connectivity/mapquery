@@ -3,16 +3,11 @@ package org.jpc.examples.osm.ui;
 import static org.jpc.examples.osm.model.jpcconverters.OsmContext.getOsmContext;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.concurrent.Executor;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Worker.State;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -23,10 +18,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
-import javafx.scene.web.WebEngine;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-import netscape.javascript.JSObject;
 
 import org.jpc.commons.prologbrowser.ui.QueryBrowserPane;
 import org.jpc.engine.profile.PrologEngineProfile;
@@ -35,43 +28,26 @@ import org.jpc.engine.prolog.PrologEngine;
 import org.jpc.engine.prolog.driver.PrologEngineFactory;
 import org.jpc.examples.osm.MapQuery;
 import org.jpc.examples.osm.OsmDataLoader;
-import org.jpc.examples.osm.model.Coordinate;
-import org.jpc.examples.osm.model.Node;
-import org.jpc.examples.osm.model.Osm;
-import org.jpc.examples.osm.model.Way;
-import org.jpc.examples.osm.model.gsonconverters.CoordinateGsonConverter;
-import org.jpc.examples.osm.model.gsonconverters.NodeGsonConverter;
-import org.jpc.examples.osm.model.gsonconverters.OsmGsonConverter;
-import org.jpc.examples.osm.model.gsonconverters.WayGsonConverter;
-import org.jpc.examples.osm.model.imp.OsmFragment;
 import org.jpc.query.QueryListener;
 import org.jpc.query.Solution;
-import org.jpc.term.ListTerm;
-import org.jpc.term.Term;
+import org.jpc.util.ConversionUtil;
 import org.jpc.util.engine.PrologResourceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
-import com.google.gson.GsonBuilder;
 
 public class MapQueryPane extends Region implements QueryListener {
 	
 	Logger logger = LoggerFactory.getLogger(MapQueryPane.class);
 	
-	public static final String JAVA_SCRIPT_INTERFACE_VARIABLE = "java"; //the id of the javascript variable that will be created in the browser to refer to methods in this class
-	public static final String NODE_VARIABLE_NAME = "Node";
-	public static final String WAY_VARIABLE_NAME = "Way";
-	
 	private Executor mqExecutor;
 	private QueryBrowserPane queryBrowser;
 	private final Button loadOsmFileButton;
 	private final ProgressIndicator loadOsmFileProgress;
-	private final WebEngine webEngine;
+	private final MapBrowser mapBrowser;
 	
-	public MapQueryPane(final WebEngine webEngine, final QueryBrowserPane queryBrowser) {
-		this.webEngine = webEngine;
+	public MapQueryPane(final MapBrowser mapBrowser, final QueryBrowserPane queryBrowser) {
+		this.mapBrowser = mapBrowser;
 		this.queryBrowser = queryBrowser;
 		this.mqExecutor = queryBrowser.getExecutor();
 		
@@ -86,16 +62,6 @@ public class MapQueryPane extends Region implements QueryListener {
 							new PrologResourceLoader(prologEngine).logtalkLoad(MapQuery.LOADER_FILE); //NOTE: Uncomment this to avoid specifying in the GUI the Logtalk entry file for the map example.
 						}
 				};
-			}
-		});
-		
-		webEngine.getLoadWorker().stateProperty().addListener(new ChangeListener<State>() {
-			@Override
-			public void changed(ObservableValue<? extends State> ov, State oldState, State newState) {
-				if (newState == State.SUCCEEDED) {
-					JSObject win = (JSObject)webEngine.executeScript("window"); //this and the following instruction should be executed only after the web page has been completely loaded
-					win.setMember(JAVA_SCRIPT_INTERFACE_VARIABLE, new BrowserInterface());
-				}
 			}
 		});
 
@@ -207,62 +173,6 @@ public class MapQueryPane extends Region implements QueryListener {
 		return hBox; 
 	}
 
-	private class BrowserInterface {
-//		public void query(String queryString) {
-//			ConsolePane.this.query(queryString);
-//		}
-	}
-
-	private void drawSolution(ListMultimap<String, Term> mapQueryResult) {
-		List<Term> nodeTerms = mapQueryResult.get(NODE_VARIABLE_NAME);
-		if(nodeTerms == null)
-			nodeTerms = new ArrayList<>();
-			List<Term> wayTerms = mapQueryResult.get(WAY_VARIABLE_NAME);
-		if(wayTerms == null)
-			wayTerms = new ArrayList<>();
-			
-		List<Node> nodes = getOsmContext().fromTerm(new ListTerm(nodeTerms).asTerm());
-		List<Way> ways = getOsmContext().fromTerm(new ListTerm(wayTerms).asTerm());
-
-//		int numberNodes = nodes.size();
-//		int numberWays = ways.size();
-//		System.out.println("Number of nodes: " + numberNodes);
-//		System.out.println("Number of ways: " + numberWays);
-		
-		
-		Osm osm = new OsmFragment(nodes, ways);
-		
-		GsonBuilder gson = new GsonBuilder();
-		gson.registerTypeAdapter(Coordinate.class, new CoordinateGsonConverter());
-		gson.registerTypeAdapter(Node.class, new NodeGsonConverter());
-		gson.registerTypeAdapter(Way.class, new WayGsonConverter());
-		gson.registerTypeAdapter(OsmFragment.class, new OsmGsonConverter());
-		
-		//gson.setPrettyPrinting();
-		
-		final String osmJson = gson.create().toJson(osm);
-		Platform.runLater(new Runnable() {
-			@Override
-			public void run() {
-				logger.debug("OSM Json: " + osmJson);
-				logger.debug("Preparing to draw...");
-				webEngine.executeScript("g_drawGeoJson("+osmJson+")");
-				logger.debug("Done drawing! ...");
-			}
-		});
-	}
-
-	private void addSolution(ListMultimap<String, Term> solutionsMultimap, List<Solution> solutions) {
-		for(Solution solution : solutions) {
-			addSolution(solutionsMultimap, solution);
-		}
-	}
-	
-	private void addSolution(ListMultimap<String, Term> solutionsMultimap, Solution solution) {
-		for(Entry<String, Term> entry : solution.entrySet()) {
-			solutionsMultimap.put(entry.getKey(), entry.getValue());
-		}
-	}
 	
 	public void stop() {
 		queryBrowser.stop();
@@ -294,17 +204,14 @@ public class MapQueryPane extends Region implements QueryListener {
 
 	@Override
 	public void onNextSolutionFound(Solution solution) {
-		ListMultimap<String, Term> solutionsMultimap = ArrayListMultimap.create();
-		addSolution(solutionsMultimap, solution);
-		drawSolution(solutionsMultimap);
+		mapBrowser.draw(ConversionUtil.toObjectMap(solution, getOsmContext()));
 	}
 
 	@Override
 	public void onSolutionsFound(List<Solution> solutions) {
-		ListMultimap<String, Term> solutionsMultimap = ArrayListMultimap.create();
-		addSolution(solutionsMultimap, solutions);
-		drawSolution(solutionsMultimap);
+		mapBrowser.draw(ConversionUtil.toObjectMapList(solutions, getOsmContext()));
 	}
+
 
 	@Override
 	public void onQueryDisposed() {

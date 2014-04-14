@@ -8,4 +8,4 @@ osm::node(Node), Node::has_tags([railway-tram_stop])
 osm::node(Node), Node::has_tags([railway-station])
 
 - Streets located less than 100 meters from the Brussels central station
-osm::node(Node), Node::has_tags([railway-station]), Node::has_tags(['name:fr'-'Bruxelles-Central']), Node::coordinate(Coordinate), osm::way(Way), Way::near(Coordinate, 0.1)
+osm::node(Node), Node::has_tags([railway-station]), Node::has_tags(['name:fr'-'Bruxelles-Central']), Node::coordinates(Coordinates), osm::way(Way), Way::near(Coordinates, 0.1)

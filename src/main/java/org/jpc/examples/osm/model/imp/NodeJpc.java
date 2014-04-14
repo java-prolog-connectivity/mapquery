@@ -7,7 +7,7 @@ import static org.jpc.examples.osm.model.jpcconverters.OsmContext.getOsmContext;
 import java.util.Map;
 
 import org.jpc.engine.logtalk.LogtalkObject;
-import org.jpc.examples.osm.model.Coordinate;
+import org.jpc.examples.osm.model.Coordinates;
 import org.jpc.examples.osm.model.Node;
 import org.jpc.query.Query;
 import org.jpc.term.Term;
@@ -16,12 +16,12 @@ import org.jpc.term.Var;
 public class NodeJpc implements Node {
 
 	private Long id;
-	private Coordinate coordinate;
+	private Coordinates coordinates;
 	private Map<String,String> tags;
 
-	public NodeJpc(Long id, Coordinate coordinate, Map<String,String> tags) {
+	public NodeJpc(Long id, Coordinates coordinates, Map<String,String> tags) {
 		this.id = id;
-		this.coordinate = coordinate;
+		this.coordinates = coordinates;
 		this.tags = tags;
 	}
 	
@@ -31,8 +31,8 @@ public class NodeJpc implements Node {
 	}
 
 	@Override
-	public Coordinate getCoordinate() {
-		return coordinate;
+	public Coordinates getCoordinate() {
+		return coordinates;
 	}
 
 	@Override
@@ -41,7 +41,7 @@ public class NodeJpc implements Node {
 	}
 
 	@Override
-	public long distanceKm(Coordinate other) {
+	public long distanceKm(Coordinates other) {
 		String distanceVarName = "Distance";
 		Term message = getOsmContext().toCompound("distancekm", asList(other, new Var(distanceVarName)));
 		Query query = new LogtalkObject(this, getPrologEngine()).perform(message);
@@ -49,7 +49,7 @@ public class NodeJpc implements Node {
 	}
 
 	@Override
-	public boolean near(Coordinate other, long deltaKm) {
+	public boolean near(Coordinates other, long deltaKm) {
 		Term message = getOsmContext().toCompound("near", asList(other, deltaKm));
 		Query query = new LogtalkObject(this, getPrologEngine()).perform(message);
 		return query.hasSolution();

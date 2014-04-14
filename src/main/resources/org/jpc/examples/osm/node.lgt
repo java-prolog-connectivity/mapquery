@@ -1,22 +1,22 @@
-:- object(node(_Id,_Coordinate,_Tags), imports(taggeable(_Tags))).
+:- object(node(_Id,_Coordinates,_Tags), imports(taggeable(_Tags))).
 
 	:- info([
 		author is 'Sergio Castro',
 		comment is 'A OSM node',
 		parameters is [
 			'Id' - 'The id of the node',
-			'Coordinate' - 'The coordinate of the node',
+			'Coordinates' - 'The coordinates of the node',
 			'Tags' - 'The tags of the node']
 			]).
 
-	:- public([id/1, coordinate/1, distancekm/2, near/2]).
+	:- public([id/1, coordinates/1, distancekm/2, near/2]).
 		
 	id(Id) :- parameter(1, Id).
 		
-	coordinate(Coordinate) :- parameter(2, Coordinate).
+	coordinates(Coordinates) :- parameter(2, Coordinates).
 
-	distancekm(ThatCoordinate, Km) :- coordinate(ThisCoordinate), ThisCoordinate::distancekm(ThatCoordinate,Km).
+	distancekm(ThatCoordinates, Km) :- coordinates(ThisCoordinates), ThisCoordinates::distancekm(ThatCoordinates,Km).
 
-	near(ThatCoordinate, Km) :- coordinate(ThisCoordinate), ThisCoordinate::near(ThatCoordinate, Km).
+	near(ThatCoordinates, Km) :- coordinates(ThisCoordinates), ThisCoordinates::near(ThatCoordinates, Km).
 
 :- end_object.

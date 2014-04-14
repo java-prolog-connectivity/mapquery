@@ -13,7 +13,7 @@ import org.jpc.util.DriverUtil;
 public class Main extends Application {
     private Scene scene;
     private MapQueryPane mapQueryPane;
-    private OsmBrowser browser;
+    private MapBrowser browser;
     
     @Override public void start(Stage stage) {
         // create the scene
@@ -22,12 +22,12 @@ public class Main extends Application {
         //VBox vbox = new VBox();
         //vbox.setPadding(new Insets(10));
         //vbox.setSpacing(8);
-        browser = new OsmBrowser();
+        browser = new MapBrowser();
         QueryBrowserPane hydraPane = new QueryBrowserPane(this, null);
         PrologEngineProviderManager.setPrologEngineProvider(hydraPane.getLogicConsolePane().getPrologEngineChoiceModel());
         hydraPane.getSettingsPane().getModel().preloadLogtalkProperty().set(true);
         //queryBrowserPane.showSettings(false);
-        mapQueryPane = new MapQueryPane(browser.getEngine(), hydraPane);
+        mapQueryPane = new MapQueryPane(browser, hydraPane);
         BorderPane borderPane = new BorderPane();
         borderPane.setLeft(mapQueryPane);
         borderPane.setRight(browser);

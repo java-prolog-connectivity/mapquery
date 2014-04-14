@@ -6,12 +6,12 @@ public interface Node extends Taggeable {
 
 	public Long getId();
 	
-	public Coordinate getCoordinate();
+	public Coordinates getCoordinate();
 	
 	public Map<String, String> getTags();
 
-	public long distanceKm(Coordinate other);
+	public long distanceKm(Coordinates other);
 
-	public boolean near(Coordinate other, long deltaKm);
+	public boolean near(Coordinates other, long deltaKm);
 	
 }

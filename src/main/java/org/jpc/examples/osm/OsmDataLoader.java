@@ -13,7 +13,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.jpc.engine.prolog.PrologEngine;
-import org.jpc.examples.osm.model.jpcconverters.CoordinateJpcConverter;
+import org.jpc.examples.osm.model.jpcconverters.CoordinatesJpcConverter;
 import org.jpc.examples.osm.model.jpcconverters.NodeJpcConverter;
 import org.jpc.examples.osm.model.jpcconverters.WayJpcConverter;
 import org.jpc.salt.CachedPrologEngineWriter;
@@ -90,7 +90,7 @@ public class OsmDataLoader {
 				writer.startIntegerTerm(Long.parseLong(id));
 				String lat = attributes.getValue(LAT_NODE_ATTRIBUTE);
 				String lon = attributes.getValue(LON_NODE_ATTRIBUTE);
-				writer.startCompound().startAtom(CoordinateJpcConverter.COORDINATE_FUNCTOR).startFloatTerm(Double.parseDouble(lon)).startFloatTerm(Double.parseDouble(lat)).endCompound();
+				writer.startCompound().startAtom(CoordinatesJpcConverter.COORDINATE_FUNCTOR).startFloatTerm(Double.parseDouble(lon)).startFloatTerm(Double.parseDouble(lat)).endCompound();
 			} else if(qName.equals(WAY_ELEMENT)) {
 				writer.startCompound().startAtom(WayJpcConverter.WAY_FUNCTOR); //to be closed later in the endElement method
 				String id = attributes.getValue(ID_ATTRIBUTE);

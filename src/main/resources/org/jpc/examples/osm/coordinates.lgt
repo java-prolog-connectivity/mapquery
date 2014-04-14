@@ -1,4 +1,4 @@
-:- object(coordinate(_Lon,_Lat)).
+:- object(coordinates(_Lon,_Lat)).
 
 	:- info([
 		author is 'Sergio Castro',
@@ -14,22 +14,22 @@
 		
 		lat(Lat) :- parameter(2, Lat).
 		
-		near(Coordinate, Km) :- distancekm(Coordinate, D), D=<Km.
+		near(Coordinates, Km) :- distancekm(Coordinates, D), D=<Km.
 		
 		:- info(distancekm/2, [
 			comment is 'Equivalence between degrees and radians.',
-			argnames is ['Coordinate', 'Distance'],
+			argnames is ['Coordinates', 'Distance'],
 			bibliography is ['http://www.movable-type.co.uk/scripts/latlong.html']]).
 			
-		distancekm(Coordinate, D) :- earthRadiusKm(R),
-			lon(ThisLon), degreesAsRadians(ThisLon, ThisLonRad), Coordinate::lon(ThatLon), degreesAsRadians(ThatLon, ThatLonRad),
-			lat(ThisLat), degreesAsRadians(ThisLat, ThisLatRad), Coordinate::lat(ThatLat), degreesAsRadians(ThatLat, ThatLatRad),
+		distancekm(Coordinates, D) :- earthRadiusKm(R),
+			lon(ThisLon), degreesAsRadians(ThisLon, ThisLonRad), Coordinates::lon(ThatLon), degreesAsRadians(ThatLon, ThatLonRad),
+			lat(ThisLat), degreesAsRadians(ThisLat, ThisLatRad), Coordinates::lat(ThatLat), degreesAsRadians(ThatLat, ThatLatRad),
 			X is (ThatLonRad-ThisLonRad)*cos((ThisLatRad+ThatLatRad)/2),
 			Y is ThatLatRad-ThisLatRad,
 			hypotenuse(X,Y,Hyp),
 			D is Hyp*R.
 		
-		distancem(Coordinate, D) :- distancekm(Coordinate, Dkm), D is Dkm*1000.
+		distancem(Coordinates, D) :- distancekm(Coordinates, Dkm), D is Dkm*1000.
 		
 		earthRadiusKm(6371). %earth's mean radius in km
 		

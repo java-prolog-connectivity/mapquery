@@ -12,7 +12,7 @@
 	
 	node(Node) :- node(_, Node).
 	
-	node(Id, node(Id, Coordinate, Tags)) :- node(Id, Coordinate, Tags).
+	node(Id, node(Id, Coordinates, Tags)) :- node(Id, Coordinates, Tags).
 	
 	number_ways(N) :- findall(Way,::way(Way),L), list::length(L,N).
 	

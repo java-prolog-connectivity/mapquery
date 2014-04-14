@@ -13,8 +13,8 @@ public interface Way extends Taggeable {
 	
 	public Map<String, String> getTags();
 	
-	public long distanceKm(Coordinate other);
+	public long distanceKm(Coordinates other);
 	
-	public boolean near(Coordinate other, long deltaKm);
+	public boolean near(Coordinates other, long deltaKm);
 	
 }

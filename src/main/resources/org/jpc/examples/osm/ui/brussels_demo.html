@@ -87,14 +87,16 @@
 	//var g_disableQueryOptions;
 	//var g_enableQueryOptions;
 	var g_drawGeoJson;
+	var g_goToCoordinates;
+	var g_zoomTo;
 	
 	(function ($) {
 	
 		var map;
 		var vectorLayer;
 		var features;
-		var numberZoomLevels = 16;
-		var defaultZoom = 11; //Starting zoom level
+		var numberZoomLevels = 20;
+		var defaultZoom = 0; //Starting zoom level
 		var geoJsonFormat;
 		
 		function initMap() {
@@ -173,6 +175,8 @@
 			map.addControls([selectFeatureControl, new OpenLayers.Control.LayerSwitcher({})]);
 			selectFeatureControl.activate();
 			
+			
+/*
 			//Brussels coordinates
 			var lon=4.3524950;
 			var lat=50.8467493;
@@ -180,6 +184,9 @@
 			$('#longitude').val(lon);
 			$('#latitude').val(lat);
 			goToCoordinates(lon, lat, defaultZoom);
+*/
+			zoomTo(defaultZoom);
+			
 			
 			/*
 			if(!map.getCenter()){
@@ -195,9 +202,17 @@
 		}
 	
 		function goToCoordinates(lon, lat, zoom) {
+			$('#longitude').val(lon);
+			$('#latitude').val(lat);
 			var lonLat = new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
 			map.setCenter(lonLat, zoom);
 		}
+		g_goToCoordinates = goToCoordinates;
+		
+		function zoomTo(zoom) {
+			map.zoomTo(zoom);
+		}
+		g_zoomTo = zoomTo;
 	
 		function loadFile() {
 			//var osmFile = $('#browse_osm_file_button').val();
@@ -223,19 +238,22 @@
 			$('#go_button').click(function() {
 				goToUserCoordinates();
 			});
+			
 			/*
 			$('#query_button').click(function() {
 				populateVectorLayer();
 			});
 			*/
+			
 			$('#clear_map_button').click(function() {
 				cleanVectorLayer();
 			});
 			
-			
+			/*
 			$('div.help-menu').click(function() {
 				$(this).next().toggle('slow');
 			});
+			*/
 		}
 		
 		/*
@@ -256,6 +274,8 @@
 			
 			//disableQueryOptions();
 			initMap(); //TODO put at the beginning of the method, but inside an if block testing if there is internet connection
+			//g_goToCoordinates(3, 45);
+			//g_zoomTo(1);
 		});
 
 	})(jQuery);
@@ -290,7 +310,7 @@
 					<input id="clear_map_button" class="query-option" type="button" value="Clear POIs" />
 				</div>
 			</div>
-			<div id="map_element" style="width: 500px; height: 500px;"></div>
+			<div id="map_element" style="width: 600px; height: 600px;"></div>
 			<!--
 			<div>
 				<textarea id="query_string" class="query-option" rows="3" cols="68"></textarea><br />
@@ -299,6 +319,8 @@
 			-->
 		  </div>
 		</div>
+		
+		<!--
 		<div id="help">
 			<div class="help-menu"><h1>Help</h1></div>
 			<div class="help-content">
@@ -314,13 +336,9 @@
 				<h3>coordinates/2</h3>
 				<p>lon/1, lat/1, distancekm/2, distancem/2, near/2</p>
 			</div>
-			<!--
-			<div class="help-menu"><h1>Examples</h1></div>
-			<div class="help-content">
-				
-			</div>
-			-->
 		</div>
+		-->
+		
 	</div>
 
 </body>
@@ -332,8 +350,8 @@ var elem = document.getElementById('offline_warning');
 	elem.style.display = 'block';
 	elem.value = 'No internet access. This application requires an internet connection.';
  } else {
- 	elem.style.display = 'block';
- 	elem.value = 'Internet :)';
+ 	//elem.style.display = 'block';
+ 	//elem.value = 'Internet OK :)';
  }
  
  

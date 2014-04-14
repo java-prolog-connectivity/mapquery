@@ -10,7 +10,7 @@ import java.util.Map;
 import org.jpc.converter.catalog.list.IterableConverter;
 import org.jpc.converter.catalog.map.MapConverter;
 import org.jpc.engine.logtalk.LogtalkObject;
-import org.jpc.examples.osm.model.Coordinate;
+import org.jpc.examples.osm.model.Coordinates;
 import org.jpc.examples.osm.model.Node;
 import org.jpc.examples.osm.model.Way;
 import org.jpc.query.Query;
@@ -58,7 +58,7 @@ public class WayJpc implements Way {
 	}
 
 	@Override
-	public long distanceKm(Coordinate other) {
+	public long distanceKm(Coordinates other) {
 		String distanceVarName = "Distance";
 		Term message = getOsmContext().toCompound("distancekm", asList(other, new Var(distanceVarName)));
 		Query query = new LogtalkObject(this, getPrologEngine()).perform(message);
@@ -66,7 +66,7 @@ public class WayJpc implements Way {
 	}
 
 	@Override
-	public boolean near(Coordinate other, long deltaKm) {
+	public boolean near(Coordinates other, long deltaKm) {
 		Term message = getOsmContext().toCompound("near", asList(other, deltaKm));
 		Query query = new LogtalkObject(this, getPrologEngine()).perform(message);
 		return query.hasSolution();

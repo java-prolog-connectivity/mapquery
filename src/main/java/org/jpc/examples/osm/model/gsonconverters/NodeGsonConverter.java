@@ -20,7 +20,7 @@ public class NodeGsonConverter implements JsonSerializer<Node> {
 		
 		JsonObject jsonGeometry = new JsonObject();
 		jsonGeometry.addProperty(GeoJsonConstants.TYPE, GeoJsonConstants.POINT);
-		jsonGeometry.add(GeoJsonConstants.COORDINATES, new CoordinateGsonConverter().serialize(node.getCoordinate(), node.getCoordinate().getClass(), context));
+		jsonGeometry.add(GeoJsonConstants.COORDINATES, new CoordinatesGsonConverter().serialize(node.getCoordinate(), node.getCoordinate().getClass(), context));
 		jsonNode.add(GeoJsonConstants.GEOMETRY, jsonGeometry);
 		return jsonNode;
 	}
