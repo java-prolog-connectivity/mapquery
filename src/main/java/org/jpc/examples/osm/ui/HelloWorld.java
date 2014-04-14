@@ -11,28 +11,11 @@ import javafx.stage.Stage;
 public class HelloWorld extends Application {
 	
 	public static void launch() {
-//		javafx.application.Platform.runLater(new Runnable() {
-//
-//			@Override
-//			public void run() {
-//				Application.launch();
-//			}
-//			 
-//		 });
-//		
-//		new Thread() {
-//			@Override
-//			public void run() {
-//				System.out.println("Starting");
-//				Application.launch();
-//			}
-//		}.start();
-		
 		Application.launch();
 	}
 	
     public static void main(String[] args) {
-        launch();
+    	Application.launch();
     }
     
     @Override
