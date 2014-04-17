@@ -1,0 +1,26 @@
+{
+engines: [
+  {
+    "id": "swi_jpl",
+    "factoryClass": "org.jpc.engine.jpl.JplSwiDriver",
+    "%factoryMethod": "createMTPrologEngine",
+    "profileClass": "org.jpc.engine.profile.LogtalkEngineProfile"
+  },
+  {
+    "id": "yap_jpl",
+    "factoryClass": "org.jpc.engine.jpl.JplYapDriver",
+    "%factoryMethod": "createMTPrologEngine",
+    "profileClass": "org.jpc.engine.profile.LogtalkEngineProfile"
+  },
+  {
+    "id": "swi_pdt",
+    "factoryClass": "org.jpc.engine.pdtconnector.PdtConnectorDriver",
+    "profileClass": "org.jpc.engine.profile.LogtalkEngineProfile"
+  },
+  {
+    "id": "xsb_interprolog",
+    "factoryClass": "org.jpc.engine.interprolog.InterPrologXsbDriver",
+    "profileClass": "org.jpc.engine.profile.LogtalkEngineProfile"
+  }
+]
+}
