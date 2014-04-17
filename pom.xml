@@ -56,11 +56,14 @@
 			<version>0.0.1-alpha-SNAPSHOT</version>
 		</dependency> 
 		
+		<!-- 
    		<dependency>
 			<groupId>com.github.java-prolog-connectivity</groupId>
 			<artifactId>jpc-drivers</artifactId>
 			<version>0.0.1-alpha-SNAPSHOT</version>
 		</dependency>	
+		 -->
+		 
 	</dependencies>
 	
 	<build>
