@@ -4,10 +4,8 @@ import static org.jpc.engine.provider.PrologEngineProviderManager.setPrologEngin
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import org.jpc.engine.jpl.JplSwiDriver;
-import org.jpc.engine.profile.LogtalkEngineProfile;
 import org.jpc.engine.prolog.PrologEngine;
-import org.jpc.engine.prolog.driver.AbstractPrologEngineDriver;
+import org.jpc.engine.prolog.PrologEngines;
 import org.jpc.engine.provider.SimpleEngineProvider;
 import org.jpc.examples.osm.MapQuery;
 import org.jpc.examples.osm.model.jpcconverters.OsmContext;
@@ -40,10 +38,7 @@ public class MapBrowserStage extends Stage {
 	 */
 	public static void main(String[] args) {
 		//launch();
-		
-		
-		AbstractPrologEngineDriver prologEngineConfiguration = new JplSwiDriver();
-		PrologEngine prologEngine = new LogtalkEngineProfile(prologEngineConfiguration).createPrologEngine();
+		PrologEngine prologEngine = PrologEngines.getPrologEngineById("swi_jpl");
 		setPrologEngineProvider(new SimpleEngineProvider(prologEngine));
 		if(!MapQuery.loadAll()) //load logic files
 			throw new RuntimeException();
