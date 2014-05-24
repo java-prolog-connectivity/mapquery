@@ -204,12 +204,12 @@ public class MapQueryPane extends Region implements QueryListener {
 
 	@Override
 	public void onNextSolutionFound(Solution solution) {
-		mapBrowser.draw(ConversionUtil.toObjectMap(solution, getOsmContext()));
+		mapBrowser.drawSolution(ConversionUtil.toObjectMap(solution, getOsmContext()));
 	}
 
 	@Override
 	public void onSolutionsFound(List<Solution> solutions) {
-		mapBrowser.draw(ConversionUtil.toObjectMapList(solutions, getOsmContext()));
+		mapBrowser.drawSolutions(ConversionUtil.toObjectMapList(solutions, getOsmContext()));
 	}
 
 

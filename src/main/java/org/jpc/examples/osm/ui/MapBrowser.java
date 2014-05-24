@@ -1,9 +1,8 @@
 package org.jpc.examples.osm.ui;
 
-import static org.jpc.examples.osm.model.jpcconverters.OsmContext.getOsmContext;
+import static java.util.Arrays.asList;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,14 +21,13 @@ import netscape.javascript.JSObject;
 import org.jpc.examples.osm.model.Coordinates;
 import org.jpc.examples.osm.model.Node;
 import org.jpc.examples.osm.model.Osm;
+import org.jpc.examples.osm.model.Taggeable;
 import org.jpc.examples.osm.model.Way;
 import org.jpc.examples.osm.model.gsonconverters.CoordinatesGsonConverter;
 import org.jpc.examples.osm.model.gsonconverters.NodeGsonConverter;
 import org.jpc.examples.osm.model.gsonconverters.OsmGsonConverter;
 import org.jpc.examples.osm.model.gsonconverters.WayGsonConverter;
 import org.jpc.examples.osm.model.imp.OsmFragment;
-import org.jpc.term.ListTerm;
-import org.jpc.term.Term;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -156,15 +154,34 @@ public class MapBrowser extends Region {
 		}
 	}
 	
-	public void draw(Map<String, Object> solution) {
+	public void drawSolution(Map<String, Object> solution) {
 		ListMultimap<String, Object> solutionsMultimap = ArrayListMultimap.create();
 		addSolution(solutionsMultimap, solution);
 		drawSolutionMultimap(solutionsMultimap);
 	}
 	
-	public void draw(List<? extends Map<String, Object>> solutions) {
+	public void drawSolutions(List<? extends Map<String, Object>> solutions) {
 		ListMultimap<String, Object> solutionsMultimap = ArrayListMultimap.create();
 		addSolutions(solutionsMultimap, solutions);
+		drawSolutionMultimap(solutionsMultimap);
+	}
+	
+	public void draw(Taggeable taggeable) {
+		draw(asList(taggeable));
+	}
+	
+	public void draw(List<Taggeable> taggeables) {
+		//This implementation should be improved performance wise. 
+		//It is implemented in this way in order to profit from the existing drawSolutionMultimap() method, designed to draw solutions generated from the query console in the Java side.
+		ListMultimap<String, Object> solutionsMultimap = ArrayListMultimap.create();
+		for(Taggeable taggeable : taggeables) {
+			if(taggeable instanceof Node)
+				solutionsMultimap.put(NODE_VARIABLE_NAME, taggeable);
+			else if(taggeable instanceof Way)
+				solutionsMultimap.put(WAY_VARIABLE_NAME, taggeable);
+			else
+				throw new RuntimeException("Unrecognized Taggeable : " + taggeable + ".");
+		}
 		drawSolutionMultimap(solutionsMultimap);
 	}
 	
