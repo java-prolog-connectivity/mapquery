@@ -7,11 +7,11 @@ import org.jpc.term.Atom;
 
 public class OsmJpcConverter implements ToTermConverter<Osm, Atom> {
 	
-	public static final String OSM_NAME = "osm"; //osm prolog functor
+	public static final String OSM_FUNCTOR_NAME = "osm";
 	
 	@Override
-	public Atom toTerm(Osm way, Class<Atom> termClass, Jpc context) {
-		return new Atom(OSM_NAME);
+	public Atom toTerm(Osm osm, Class<Atom> termClass, Jpc jpc) {
+		return new Atom(OSM_FUNCTOR_NAME);
 	}
 	
 }
