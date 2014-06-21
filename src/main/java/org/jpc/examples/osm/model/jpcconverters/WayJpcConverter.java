@@ -12,7 +12,6 @@ import org.jpc.converter.ToTermConverter;
 import org.jpc.examples.osm.model.Way;
 import org.jpc.examples.osm.model.imp.WayJpc;
 import org.jpc.term.Compound;
-import org.jpc.term.IntegerTerm;
 
 public class WayJpcConverter implements ToTermConverter<Way, Compound>, FromTermConverter<Compound, Way> {
 

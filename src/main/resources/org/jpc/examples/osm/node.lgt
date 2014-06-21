@@ -1,4 +1,4 @@
-:- object(node(_Id,_Coordinates,_Tags), imports(taggeable(_Tags))).
+:- object(node(_Id,_Coordinates,_Tags), imports(taggable(_Tags))).
 
 	:- info([
 		author is 'Sergio Castro',

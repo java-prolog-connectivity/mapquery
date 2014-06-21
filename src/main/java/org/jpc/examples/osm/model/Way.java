@@ -3,7 +3,7 @@ package org.jpc.examples.osm.model;
 import java.util.List;
 import java.util.Map;
 
-public interface Way extends Taggeable {
+public interface Way extends Taggable {
 
 	public Long getId();
 	

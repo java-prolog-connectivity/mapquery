@@ -21,7 +21,7 @@ import netscape.javascript.JSObject;
 import org.jpc.examples.osm.model.Coordinates;
 import org.jpc.examples.osm.model.Node;
 import org.jpc.examples.osm.model.Osm;
-import org.jpc.examples.osm.model.Taggeable;
+import org.jpc.examples.osm.model.Taggable;
 import org.jpc.examples.osm.model.Way;
 import org.jpc.examples.osm.model.gsonconverters.CoordinatesGsonConverter;
 import org.jpc.examples.osm.model.gsonconverters.NodeGsonConverter;
@@ -166,21 +166,21 @@ public class MapBrowser extends Region {
 		drawSolutionMultimap(solutionsMultimap);
 	}
 	
-	public void draw(Taggeable taggeable) {
-		draw(asList(taggeable));
+	public void draw(Taggable taggable) {
+		draw(asList(taggable));
 	}
 	
-	public void draw(List<Taggeable> taggeables) {
+	public void draw(List<Taggable> taggables) {
 		//This implementation should be improved performance wise. 
 		//It is implemented in this way in order to profit from the existing drawSolutionMultimap() method, designed to draw solutions generated from the query console in the Java side.
 		ListMultimap<String, Object> solutionsMultimap = ArrayListMultimap.create();
-		for(Taggeable taggeable : taggeables) {
-			if(taggeable instanceof Node)
-				solutionsMultimap.put(NODE_VARIABLE_NAME, taggeable);
-			else if(taggeable instanceof Way)
-				solutionsMultimap.put(WAY_VARIABLE_NAME, taggeable);
+		for(Taggable taggable : taggables) {
+			if(taggable instanceof Node)
+				solutionsMultimap.put(NODE_VARIABLE_NAME, taggable);
+			else if(taggable instanceof Way)
+				solutionsMultimap.put(WAY_VARIABLE_NAME, taggable);
 			else
-				throw new RuntimeException("Unrecognized Taggeable : " + taggeable + ".");
+				throw new RuntimeException("Unrecognized Taggable : " + taggable + ".");
 		}
 		drawSolutionMultimap(solutionsMultimap);
 	}

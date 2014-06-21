@@ -1,8 +1,8 @@
-:- category(taggeable(_Tags)).
+:- category(taggable(_Tags)).
 
 	:- info([
 		author is 'Sergio Castro',
-		comment is 'A Taggeable object',
+		comment is 'A Taggable object',
 		parameters is [
 			'Tags' - 'The tags of this object']
 			]).
@@ -10,7 +10,7 @@
 	:- public([tags/1, tag/2, has_tags/1]).
 
 	:- info(tags/1, [
-    	comment is 'Tags is the tags in this taggeable.',
+    	comment is 'Tags is the tags in this taggable.',
     	argnames is ['Tags']
 	]).
 	
@@ -26,7 +26,7 @@
 
 
 	:- info(hastags/1, [
-    	comment is 'SomeTags is a list of tags owned by this taggeable.',
+    	comment is 'SomeTags is a list of tags owned by this taggable.',
     	argnames is ['SomeTags']
 	]).
 	

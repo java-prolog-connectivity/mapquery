@@ -1,4 +1,4 @@
-:- object(way(_Id,_NodesIds,_Tags), imports(taggeable(_Tags))).
+:- object(way(_Id,_NodesIds,_Tags), imports(taggable(_Tags))).
 
 	:- info([
 		author is 'Sergio Castro',

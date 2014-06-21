@@ -2,7 +2,7 @@ package org.jpc.examples.osm.model;
 
 import java.util.Map;
 
-public interface Node extends Taggeable {
+public interface Node extends Taggable {
 
 	public Long getId();
 	
