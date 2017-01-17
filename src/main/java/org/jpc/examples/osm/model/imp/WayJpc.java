@@ -7,15 +7,12 @@ import static org.jpc.engine.provider.PrologEngineProviderManager.getPrologEngin
 import java.util.List;
 import java.util.Map;
 
-import org.jpc.converter.catalog.list.IterableConverter;
-import org.jpc.converter.catalog.map.MapConverter;
 import org.jpc.engine.logtalk.LogtalkObject;
 import org.jpc.examples.osm.model.Coordinates;
 import org.jpc.examples.osm.model.Node;
 import org.jpc.examples.osm.model.Way;
 import org.jpc.query.Query;
 import org.jpc.term.Compound;
-import org.jpc.term.IntegerTerm;
 import org.jpc.term.Term;
 import org.jpc.term.Var;
 
