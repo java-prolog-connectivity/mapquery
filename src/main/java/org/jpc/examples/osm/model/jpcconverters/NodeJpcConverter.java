@@ -6,8 +6,8 @@ import java.lang.reflect.Type;
 import java.util.Map;
 
 import org.jpc.Jpc;
-import org.jpc.converter.FromTermConverter;
-import org.jpc.converter.ToTermConverter;
+import org.jpc.mapping.converter.FromTermConverter;
+import org.jpc.mapping.converter.ToTermConverter;
 import org.jpc.examples.osm.model.Coordinates;
 import org.jpc.examples.osm.model.Node;
 import org.jpc.examples.osm.model.imp.NodeJpc;

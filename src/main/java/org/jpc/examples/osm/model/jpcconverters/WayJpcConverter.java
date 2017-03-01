@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.jpc.Jpc;
-import org.jpc.converter.FromTermConverter;
-import org.jpc.converter.ToTermConverter;
+import org.jpc.mapping.converter.FromTermConverter;
+import org.jpc.mapping.converter.ToTermConverter;
 import org.jpc.examples.osm.model.Way;
 import org.jpc.examples.osm.model.imp.WayJpc;
 import org.jpc.term.Compound;

@@ -5,8 +5,8 @@ import static java.util.Arrays.asList;
 import java.lang.reflect.Type;
 
 import org.jpc.Jpc;
-import org.jpc.converter.FromTermConverter;
-import org.jpc.converter.ToTermConverter;
+import org.jpc.mapping.converter.FromTermConverter;
+import org.jpc.mapping.converter.ToTermConverter;
 import org.jpc.examples.osm.model.Coordinates;
 import org.jpc.examples.osm.model.imp.CoordinatesJpc;
 import org.jpc.term.Compound;

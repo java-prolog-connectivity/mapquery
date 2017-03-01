@@ -17,7 +17,7 @@ import org.jpc.examples.osm.model.jpcconverters.CoordinatesJpcConverter;
 import org.jpc.examples.osm.model.jpcconverters.NodeJpcConverter;
 import org.jpc.examples.osm.model.jpcconverters.WayJpcConverter;
 import org.jpc.util.salt.CachedPrologEngineWriter;
-import org.jpc.util.termprocessor.PrologWriter;
+import org.jpc.util.termprocessor.PrologAbstractWriter;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -38,7 +38,7 @@ public class OsmDataLoader {
 	public static final String VALUE_TAG_ATTRIBUTE = "v"; //key xml attribute
 	
 	private PrologEngine prologEngine;
-	private PrologWriter writer;
+	private PrologAbstractWriter writer;
 	
 	public OsmDataLoader(PrologEngine prologEngine) {
 		this.prologEngine = prologEngine;
@@ -62,7 +62,7 @@ public class OsmDataLoader {
 		try {
 			//writer = new PrologEngineWriter(prologEngine);
 			writer = new CachedPrologEngineWriter(prologEngine);
-			writer.followingDynamicClauses();
+			writer.followingClauses();
 			writer.startLogtalkObjectContext().startAtom("osm");
 			
 			final Set<String> names = new HashSet<>();

@@ -1,7 +1,7 @@
 package org.jpc.examples.osm.model.jpcconverters;
 
 import org.jpc.Jpc;
-import org.jpc.converter.ToTermConverter;
+import org.jpc.mapping.converter.ToTermConverter;
 import org.jpc.examples.osm.model.Osm;
 import org.jpc.term.Atom;
 

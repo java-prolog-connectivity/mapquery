@@ -4,7 +4,7 @@ import static org.jpc.term.Functor.functor;
 
 import org.jpc.Jpc;
 import org.jpc.JpcBuilder;
-import org.jpc.converter.catalog.map.MapConverter.MapToTermConverter;
+import org.jpc.mapping.converter.catalog.map.MapConverter.MapToTermConverter;
 
 public class OsmContext {
 
